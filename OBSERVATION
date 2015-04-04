@@ -1,0 +1,10 @@
+4/5, 2015
+
+about mapsplice2
+1. information of sam file for chimeric read is not reliable... (e.g., pair information, samflags and so on)
+2. there are surely inconsistencies about the position and direction of paired reads of chimeric reads, 
+so we can filter the chimeric read with inconsistent paired reads
+3. also, it seems that there are surely inconsistencies about the position of break point and soft clipped position,
+so we can also filter the chimeric reads with inconsistent break points.
+
+
