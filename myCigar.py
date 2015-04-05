@@ -2,6 +2,7 @@ import re
 
 reCigar = re.compile(r'(\d+)([DIMNS])')
 
+# get the region covered by the alignment
 def getCoverRegion(chr, pos, cigar):
 
     tempStart = int(pos)
@@ -20,6 +21,15 @@ def getCoverRegion(chr, pos, cigar):
     return ','.join(coverRegion)
 
 
+# get the end positon
+def getEndPos(pos, cigar):
+
+    tempPos = int(pos)
+    for m in reCigar.finditer(cigar):
+        if m.group(2) in ["M", "N", "D"]:
+            tempPos = tempPos + int(m.group(1))
+
+    return tempStart
 if __name__ == "__main__":
     import sys
     print getCoverRegion(sys.argv[1], sys.argv[2], sys.argv[3])
