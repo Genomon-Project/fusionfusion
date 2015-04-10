@@ -24,12 +24,14 @@ def getCoverRegion(chr, pos, cigar):
 # get the end positon
 def getEndPos(pos, cigar):
 
-    tempPos = int(pos)
+    tempPos = int(pos) - 1
     for m in reCigar.finditer(cigar):
         if m.group(2) in ["M", "N", "D"]:
             tempPos = tempPos + int(m.group(1))
 
-    return tempStart
+    return tempPos 
+
+
 if __name__ == "__main__":
     import sys
     print getCoverRegion(sys.argv[1], sys.argv[2], sys.argv[3])
