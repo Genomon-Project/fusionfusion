@@ -20,6 +20,7 @@ for line in hIN:
 
         tempKey = key
         tempIDs = []
+        tempInseq = []
         tempMQ_primary = []
         tempCover_primary = []
         tempDir_primary = []

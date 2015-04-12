@@ -4,7 +4,7 @@
     script for collecting short reads supporting fusion candidates in MapSplice2 sam file
 """
 
-import sys, re, getCoverRegion
+import sys, re, myCigar 
 
 inputFile = sys.argv[1]
 
@@ -34,21 +34,21 @@ def printFusInfo(tempLine, fusInfo):
                 pos_chimera = FF[3]
                 dir_chimera = ("+" if flags[4] != "1" else "-")
                 mq_chimera = FF[4]
-                cover_chimera = getCoverRegion.getCoverRegion(FF[2], FF[3], FF[5])
+                cover_chimera = myCigar.getCoverRegion(FF[2], FF[3], FF[5])
                 if fusOrder == 0: fusOrder = -1
             elif flags[8] != "1" and fusInfo[i] == fus:
                 chr_primary = FF[2]
                 pos_primary = FF[3]
                 dir_primary = ("+" if flags[4] != "1" else "-")
                 mq_primary = FF[4]
-                cover_primary = getCoverRegion.getCoverRegion(FF[2], FF[3], FF[5])
+                cover_primary = myCigar.getCoverRegion(FF[2], FF[3], FF[5])
                 if fusOrder == 0: fusOrder = 1
             elif flags[8] != "1" and flags[2] != "1" and (fusInfo[i] != fus or chr_primary != "*"):
                 chr_pair = FF[2]
                 pos_pair = FF[3]
                 dir_pair = ("+" if flags[4] != "1" else "-")
                 mq_pair = FF[4]
-                cover_pair = getCoverRegion.getCoverRegion(FF[2], FF[3], FF[5])
+                cover_pair = myCigar.getCoverRegion(FF[2], FF[3], FF[5])
 
         if chr_primary == "*": continue
         fusSplit = fus.split(',')
@@ -67,11 +67,11 @@ def printFusInfo(tempLine, fusInfo):
             if breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + 500000: pairPos = 2
 
         if chr_primary < chr_chimera or chr_primary == chr_chimera and breakPos_primary <= breakPos_chimera:
-            print '\t'.join([chr_primary, breakPos_primary, breakDir_primary, chr_chimera, breakPos_chimera, breakDir_chimera, tempID, \
+            print '\t'.join([chr_primary, breakPos_primary, breakDir_primary, chr_chimera, breakPos_chimera, breakDir_chimera, "---", tempID, \
                              mq_primary, cover_primary, dir_primary, mq_pair, cover_pair, dir_pair, \
                              mq_chimera, cover_chimera, dir_chimera, str(pairPos), "1"] )
         else:
-            print '\t'.join([chr_chimera, breakPos_chimera, breakDir_chimera, chr_primary, breakPos_primary, breakDir_primary, tempID, \
+            print '\t'.join([chr_chimera, breakPos_chimera, breakDir_chimera, chr_primary, breakPos_primary, breakDir_primary, "---", tempID, \
                              mq_primary, cover_primary, dir_primary, mq_pair, cover_pair, dir_pair, \
                              mq_chimera, cover_chimera, dir_chimera, str(pairPos), "2"] )
 
