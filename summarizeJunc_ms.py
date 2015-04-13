@@ -13,7 +13,7 @@ for line in hIN:
 
     if tempKey != key:
         if tempKey != "":
-            print '\t'.join([tempKey, ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
+            print '\t'.join([tempKey, ';'.join(tempInseq), ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
                              ';'.join(tempMQ_pair), ';'.join(tempCover_pair), ';'.join(tempDir_pair), \
                              ';'.join(tempMQ_SA), ';'.join(tempCover_SA), ';'.join(tempDir_SA), ';'.join(tempPairPos), ';'.join(tempPrimaryPos)])
             
@@ -33,22 +33,23 @@ for line in hIN:
         tempPairPos = []
         tempPrimaryPos = []
 
-    tempIDs.append(F[6])
-    tempMQ_primary.append(F[7])
-    tempCover_primary.append(F[8])
-    tempDir_primary.append(F[9])
-    tempMQ_pair.append(F[10])
-    tempCover_pair.append(F[11])
-    tempDir_pair.append(F[12])
-    tempMQ_SA.append(F[13])
-    tempCover_SA.append(F[14])
-    tempDir_SA.append(F[15])
-    tempPairPos.append(F[16])
-    tempPrimaryPos.append(F[17])
+    tempInseq.append(F[6])
+    tempIDs.append(F[7])
+    tempMQ_primary.append(F[8])
+    tempCover_primary.append(F[9])
+    tempDir_primary.append(F[10])
+    tempMQ_pair.append(F[11])
+    tempCover_pair.append(F[12])
+    tempDir_pair.append(F[13])
+    tempMQ_SA.append(F[14])
+    tempCover_SA.append(F[15])
+    tempDir_SA.append(F[16])
+    tempPairPos.append(F[17])
+    tempPrimaryPos.append(F[18])
 
 hIN.close()
 
-print '\t'.join([tempKey, ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
+print '\t'.join([tempKey, ';'.join(tempInseq), ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
                  ';'.join(tempMQ_pair), ';'.join(tempCover_pair), ';'.join(tempDir_pair), \
                  ';'.join(tempMQ_SA), ';'.join(tempCover_SA), ';'.join(tempDir_SA), ';'.join(tempPairPos), ';'.join(tempPrimaryPos)])
 
