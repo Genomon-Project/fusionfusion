@@ -6,28 +6,31 @@ inputFile = sys.argv[1]
 minReadPairNum = int(sys.argv[2])
 minValidThres = float(sys.argv[3])
 minCoveredBase = int(sys.argv[4])
+minSize = 1000
 
 hIN = open(inputFile, 'r')
 
 for line in hIN:
     F = line.rstrip('\n').split('\t')
 
+    if F[0] == F[3] and abs(int(F[1]) - int(F[4])) < minSize: continue
+
     # filter by the number of supporting read pairs
-    IDs = F[6].split(';')
+    IDs = F[7].split(';')
     uIDs = list(set(IDs))
     if len(uIDs) < minReadPairNum: continue
 
     # filter by the ratio of valid read pairs
-    pairPos = F[16].split(';')
+    pairPos = F[17].split(';')
     if float(pairPos.count("0")) / float(len(pairPos)) > 1 - minValidThres: continue
 
 
     # check for the covered region
-    coveredRegion_primary = F[8].split(';')
-    coveredRegion_pair = F[11].split(';')
-    coveredRegion_SA = F[14].split(';')
-    pairPos = F[16].split(';')
-    primaryPos = F[17].split(';')
+    coveredRegion_primary = F[9].split(';')
+    coveredRegion_pair = F[12].split(';')
+    coveredRegion_SA = F[15].split(';')
+    pairPos = F[17].split(';')
+    primaryPos = F[18].split(';')
 
     region1 =  regions.Regions()
     region2 =  regions.Regions()
