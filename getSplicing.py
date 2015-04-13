@@ -1,8 +1,9 @@
 #! /usr/local/bin/python
 
-import sys, re, regions
+import sys, re, pysam, regions, mySeq
 
 inputFile = sys.argv[1]
+reference = sys.argv[2]
 
 hIN = open(inputFile, 'r')
 
@@ -222,8 +223,6 @@ for line in hIN:
     region2.reduceMerge()
     ####################
 
-    if F[4] == "133729451":
-        print '\t'.join(F[0:6])
 
     ####################
     contig1 = []
@@ -335,9 +334,10 @@ for line in hIN:
 
         if maxEnd != - float("inf"):
             contig2.append((chr_reg, tempPos, maxEnd))
+    ####################
 
-
-
+    contigSeq1 = ""
+    contigSeq2 = ""
 
     print '\t'.join(F[0:6])
     print str(splice2count1)
@@ -346,4 +346,7 @@ for line in hIN:
     print str(splice2count2_ref)
     print str(contig1)
     print str(contig2)
+    print mySeq.getSeq(reference, contig1)
+    print mySeq.getSeq(reference, contig2)
+
  
