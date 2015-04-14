@@ -13,6 +13,10 @@ def getSeq(reference, region_tuple):
 
     return(seq)
 
+def reverseComplement(seq):
+    complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
+    return("".join(complement.get(base, base) for base in reversed(seq)))
+
 
 if __name__ == "__main__":
     import sys, pysam

@@ -339,14 +339,13 @@ for line in hIN:
     contigSeq1 = ""
     contigSeq2 = ""
 
-    print '\t'.join(F[0:6])
-    print str(splice2count1)
-    print str(splice2count1_ref)
-    print str(splice2count2)
-    print str(splice2count2_ref)
-    print str(contig1)
-    print str(contig2)
-    print mySeq.getSeq(reference, contig1)
-    print mySeq.getSeq(reference, contig2)
+    inSeq = ';'.join(list(set(F[6].split(';'))))
+
+    contigSeq1 = mySeq.getSeq(reference, contig1)
+    contigSeq2 = mySeq.getSeq(reference, contig2)
+    if F[2] == "+": contigSeq1 = mySeq.reverseComplement(contigSeq1)
+    if F[5] == "+": contigSeq2 = mySeq.reverseComplement(contigSeq2)
+
+    print '\t'.join(['\t'.join(F[0:6]), str(inSeq), str(len(F[8].split(';'))), str(contig1), str(contig2), contigSeq1, contigSeq2])
 
  
