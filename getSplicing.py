@@ -158,6 +158,7 @@ for line in hIN:
     # check about each splicing position for the pair reads 
     for i in range(0, len(coveredRegion_pair)):
         for reg in coveredRegion_pair[i].split(','):
+            if reg == "*": continue
             mReg = regRe.match(reg)
             chr_reg, start_reg, end_reg  = mReg.group(1), int(mReg.group(2)), int(mReg.group(3))
 

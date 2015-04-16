@@ -35,8 +35,8 @@ for line in hIN:
 
     key = '\t'.join(F[0:6])
 
-    match1 = key2match1[key]
-    match2 = key2match2[key]
+    match1 = (key2match1[key] if key in key2match1 else "---\t---\t---")
+    match2 = (key2match2[key] if key in key2match2 else "---\t---\t---") 
 
     matches1 = match1.split('\t')
     matches2 = match2.split('\t')
