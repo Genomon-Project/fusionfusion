@@ -16,9 +16,15 @@ for line in hIN:
     if F[0] == F[3] and abs(int(F[1]) - int(F[4])) < minSize: continue
 
     # filter by the number of supporting read pairs
-    IDs = F[7].split(';')
-    uIDs = list(set(IDs))
-    if len(uIDs) < minReadPairNum: continue
+    # IDs = F[7].split(';')
+    # uIDs = list(set(IDs))
+    # if len(uIDs) < minReadPairNum: continue
+    coveredRegion_primary = F[9].split(';')
+    coveredRegion_pair = F[12].split(';')
+    coveredRegion_SA = F[15].split(';')
+    coveredRegion_meta = [coveredRegion_primary[i] + ';' + coveredRegion_pair[i] + ';' + coveredRegion_SA[i] for i in range(0, len(coveredRegion_primary))]
+    uniqueCoverdRegion_meta = list(set(coveredRegion_meta))
+    if len(uniqueCoverdRegion_meta) < minReadPairNum: continue
 
     # filter by the ratio of valid read pairs
     pairPos = F[17].split(';')

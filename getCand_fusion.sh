@@ -22,9 +22,9 @@ then
     mkdir -p ${OUTPUTDIR}
 fi
 
-:<<_COMMENT_OUT_
+# :<<_COMMENT_OUT_
 
-if [ ${TOOL} = "STAR" ]
+if [ ${TOOL} = "star" ]
 then
     echo "python getJuncInfo_STAR.py ${INPUT} | sort -k1,1 -k2,2n -k4,4 -k 5,5n - > ${OUTPUTDIR}/junction.txt" 
     python getJuncInfo_STAR.py ${INPUT} | sort -k1,1 -k2,2n -k4,4 -k 5,5n - > ${OUTPUTDIR}/junction.txt 
@@ -33,10 +33,11 @@ then
     echo "python getJuncInfo_ms2.py ${INPUT} | sort -k1,1 -k2,2n -k4,4 -k 5,5n - > ${OUTPUTDIR}/junction.txt" 
     python getJuncInfo_ms2.py ${INPUT} | sort -k1,1 -k2,2n -k4,4 -k 5,5n - > ${OUTPUTDIR}/junction.txt 
 else
-    echo "The specified alignment tool should be STAR or ms2"
+    echo "The specified alignment tool should be star or ms2"
     exit
 fi
 
+# _COMMENT_OUT_
 
 echo "python summarizeJunc.py ${OUTPUTDIR}/junction.txt > ${OUTPUTDIR}/junction.summarized.txt"
 python summarizeJunc.py ${OUTPUTDIR}/junction.txt > ${OUTPUTDIR}/junction.summarized.txt 
@@ -53,7 +54,8 @@ python makeJuncSeqPairFa.py ${OUTPUTDIR}/junction.summarized.filt2.txt > ${OUTPU
 echo "blat -stepSize=5 -repMatch=2253 -ooc=${BLAT_OOC} ${BLAT_ALL_REF} ${OUTPUTDIR}/junction.summarized.contig.fa ${OUTPUTDIR}/junction.summarized.contig.psl"
 blat -stepSize=5 -repMatch=2253 -ooc=${BLAT_OOC} ${BLAT_ALL_REF} ${OUTPUTDIR}/junction.summarized.contig.fa ${OUTPUTDIR}/junction.summarized.contig.psl  
 
-_COMMENT_OUT_
+# _COMMENT_OUT_
+
 echo "python checkMatching.py ${OUTPUTDIR}/junction.summarized.contig.psl > ${OUTPUTDIR}/junction.summarized.contig.check.txt"
 python checkMatching.py ${OUTPUTDIR}/junction.summarized.contig.psl > ${OUTPUTDIR}/junction.summarized.contig.check.txt
 

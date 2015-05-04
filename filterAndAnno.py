@@ -54,7 +54,7 @@ for line in hIN:
         for g2 in gene2:
             if g1 == g2 and g1 != "---": sameGeneFlag = 1
 
-    if sameGeneFlag == 1: continue
+    # if sameGeneFlag == 1: continue
 
     print '\t'.join(F[0:8]) + '\t' + ';'.join(gene1) + '\t' + ';'.join(gene2) 
  
