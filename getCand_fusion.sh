@@ -22,7 +22,7 @@ then
     mkdir -p ${OUTPUTDIR}
 fi
 
-# :<<_COMMENT_OUT_
+:<<_COMMENT_OUT_
 
 if [ ${TOOL} = "STAR" ]
 then
@@ -53,7 +53,7 @@ python makeJuncSeqPairFa.py ${OUTPUTDIR}/junction.summarized.filt2.txt > ${OUTPU
 echo "blat -stepSize=5 -repMatch=2253 -ooc=${BLAT_OOC} ${BLAT_ALL_REF} ${OUTPUTDIR}/junction.summarized.contig.fa ${OUTPUTDIR}/junction.summarized.contig.psl"
 blat -stepSize=5 -repMatch=2253 -ooc=${BLAT_OOC} ${BLAT_ALL_REF} ${OUTPUTDIR}/junction.summarized.contig.fa ${OUTPUTDIR}/junction.summarized.contig.psl  
 
-
+_COMMENT_OUT_
 echo "python checkMatching.py ${OUTPUTDIR}/junction.summarized.contig.psl > ${OUTPUTDIR}/junction.summarized.contig.check.txt"
 python checkMatching.py ${OUTPUTDIR}/junction.summarized.contig.psl > ${OUTPUTDIR}/junction.summarized.contig.check.txt
 

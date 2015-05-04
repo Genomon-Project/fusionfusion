@@ -44,7 +44,10 @@ for line in hIN:
         chr1, strand1, pos1, chr2, strand2, pos2 = contigMatch.group(4), contigMatch.group(5), int(contigMatch.group(6)), contigMatch.group(1), contigMatch.group(2), int(contigMatch.group(3))
 
     if chr1 == F[13]:
-        if (strand1 == "+" and F[8] == "-" and abs(pos1 - int(F[16])) < 5) or (strand1 == "-" and F[8] == "+" and abs(pos1 - 1 - int(F[15]))) < 5:
+        if (strand1 == "+" and F[8] == "-" and abs(pos1 - int(F[16])) < 5) or (strand1 == "-" and F[8] == "+" and abs(pos1 - 1 - int(F[15])) < 5):
+            if tempID == "chr17:-58342773-chr17:+58679979_contig2":
+                pass
+
             targetAln = F[13] + ':' + str(int(F[15]) + 1) + '-' + F[16] 
             targetScore= int(F[0])
 
