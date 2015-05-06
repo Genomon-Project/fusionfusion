@@ -15,6 +15,9 @@ for line in hIN:
 
     if F[0] == F[3] and abs(int(F[1]) - int(F[4])) < minSize: continue
 
+    if F[1] == "5313724":
+        pass
+
     # filter by the number of supporting read pairs
     # IDs = F[7].split(';')
     # uIDs = list(set(IDs))
