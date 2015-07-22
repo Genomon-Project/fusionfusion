@@ -5,12 +5,12 @@ import sys, re, myCigar
 inputFile = sys.argv[1]
 
 abnormal_insert_size = 500000
-fusionCIGAR = re.compile('([\dMmNnIiDd]+)(\d+F)([\dMmNnIiDd]+)')
+fusionCIGAR = re.compile('([\dMmNnIiDd]+[Mm])(\d+F)([\dMmNnIiDd]+[Mm])')
 
 
 hIN = open(inputFile, 'r')
 for line in hIN:
-    F = line.rstrip('\n').split('\n')
+    F = line.rstrip('\n').split('\t')
 
     fusionFlag = 0
     XFInfo = ""
@@ -20,7 +20,7 @@ for line in hIN:
             XFInfo = F[i] 
             break
 
-    if fusionFlag = 0: continue
+    if fusionFlag == 0: continue
 
     # be reminded necessary variables
     chr_primary, pos_primary, dir_primary, chr_pair, pos_pair, dir_pair, chr_SA, pos_SA, dir_SA = "", "", "", "", "", "", "", "", ""
@@ -29,6 +29,9 @@ for line in hIN:
 
     # about the samflag
     flags = format(int(F[1]), "#014b")[:1:-1]
+    if flags[8] == "1" or flags[11] == "1": continue # pass non-primary alignment
+    if flags[10] == "1": continue # pass duplicate reads
+    if flags[2] == "1" or flags[3] == "1": continue # pass unless both the pair are aligned
 
     # search for XP tag
     XPInfo = ""
@@ -51,6 +54,8 @@ for line in hIN:
     pos_pair = F[7]
     dir_pair = ("-" if flags[5] == "1" else "+")
     mq_pair = "0" # since we cannot get the mapping quality of pair reads directly, this is just a dummy
+    if len(XPInfo.split(" ")) < 3:
+        pass
     cigar_pair = XPInfo.split(" ")[2]
     coverRegion_pair = myCigar.getCoverRegion(chr_pair, pos_pair, cigar_pair)
 
@@ -66,13 +71,11 @@ for line in hIN:
     cigar_SA = FCIGARMatch.group(3)
     juncDir_primary = ("-" if cigar_primary.islower() else "+")
     juncDir_SA = ("+" if cigar_SA.islower() else "+")
-
-
-    # for the supplementary read
-    chr_SA = juncChr_SA
     
 
+
     # the pair read is aligned at the same chromosome with the primary read
+    validFlag = 0
     if chr_pair == juncChr_primary:
         if juncDir_primary == "+" and dir_primary == "-" and dir_pair == "+" and 0 <= juncPos_primary - pos_pair < abnormal_insert_size:
             juncType = 1
@@ -92,11 +95,8 @@ for line in hIN:
 
     if validFlag == 1:
 
+        # TopHat2 seems not to consider inserted short bases
         juncSurplus = "---"
-        if clipLen_SA > expected_clipLen_SA:
-            surPlus_start = readLength_primary - clipLen_primary
-            surPlus_end = surPlus_start + clipLen_SA - expected_clipLen_SA
-            juncSurplus = read.seq[surPlus_start:surPlus_end]
 
         # reorder by the chromosome position and print
         if juncChr_primary < juncChr_SA or juncChr_primary == juncChr_SA and juncPos_primary <= juncPos_SA:
