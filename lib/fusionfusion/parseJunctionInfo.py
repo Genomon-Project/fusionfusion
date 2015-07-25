@@ -63,10 +63,10 @@ def getFusInfo_ms2(tempLine, fusInfo):
 
         pairPos = 0
         if pos_pair != "*":
-            if breakDir_primary == "+" and dir_pair == "+" and int(breakPos_primary) - 500000 <= int(pos_pair) <= int(breakPos_primary): pairPos = 1
-            if breakDir_primary == "-" and dir_pair == "-" and int(breakPos_primary) <= int(pos_pair) <= int(breakPos_primary) + 500000: pairPos = 1
-            if breakDir_chimera == "+" and dir_pair == "+" and int(breakPos_chimera) - 500000 <= int(pos_pair) <= int(breakPos_chimera): pairPos = 2
-            if breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + 500000: pairPos = 2
+            if breakDir_primary == "+" and dir_pair == "+" and int(breakPos_primary) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_primary): pairPos = 1
+            if breakDir_primary == "-" and dir_pair == "-" and int(breakPos_primary) <= int(pos_pair) <= int(breakPos_primary) + abnormal_insert_size: pairPos = 1
+            if breakDir_chimera == "+" and dir_pair == "+" and int(breakPos_chimera) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_chimera): pairPos = 2
+            if breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + abnormal_insert_size: pairPos = 2
 
         if chr_primary < chr_chimera or chr_primary == chr_chimera and breakPos_primary <= breakPos_chimera:
             return '\t'.join([chr_primary, breakPos_primary, breakDir_primary, chr_chimera, breakPos_chimera, breakDir_chimera, "---", tempID, \
