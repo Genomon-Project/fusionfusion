@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 from fusionfusion.run import *
+import argparse
 
 parser = argparse.ArgumentParser(prog = "EBFilter")
 
@@ -15,4 +16,6 @@ parser.add_argument("--ms2", metavar = "ms2.bam", default = None, type = str,
 parse.add_argument("paramInfoFile", metavar = "param.yaml", type = str,
                     help = "parameter information file (yaml format)")
 
+args = parser.parse_args()
 
+args.func(args)
