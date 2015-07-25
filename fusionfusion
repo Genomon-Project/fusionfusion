@@ -13,7 +13,10 @@ parser.add_argument("--star", metavar = "star_chimera.bam", default = None, type
 parser.add_argument("--ms2", metavar = "ms2.bam", default = None, type = str,
                     help = "the path to the bam file by map-splice2")
 
-parse.add_argument("paramInfoFile", metavar = "param.yaml", type = str,
+parser.add_argument("--out", metavar = "output_dir", default = None, type = str,
+                    help = "the path to the output directory")
+
+parser.add_argument("--param", metavar = "param.yaml", type = str,
                     help = "parameter information file (yaml format)")
 
 args = parser.parse_args()
