@@ -102,7 +102,7 @@ def parseJunctionInfo_ms2(inputFilePath, outputFilePath):
 
         if tempID != F[0]:
             if fusInfo.count(0) != len(tempLine):
-                print > hOUT, getFusInfo_ms2(tempLine, fusInfo)
+                print >> hOUT, getFusInfo_ms2(tempLine, fusInfo)
 
             tempID = F[0]
             fusFlag = []
@@ -122,7 +122,7 @@ def parseJunctionInfo_ms2(inputFilePath, outputFilePath):
 
 
     if fusInfo.count(0) != len(tempLine):
-        print > hOUT, getFusInfo_ms2(tempLine, fusInfo)
+        print >> hOUT, getFusInfo_ms2(tempLine, fusInfo)
 
     hOUT.close()
 
