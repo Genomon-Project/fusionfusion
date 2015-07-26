@@ -5,6 +5,9 @@ blat_path: /usr/local/bin/blat
 # option used in blat
 blat_option: -stepSize=5 -repMatch=2253
 
+# reference genome used for creating validation sequences
+reference_genome: /home/yshira/common/ref/GRCh37-lite_PCAWG_bwa-0.7.12/GRCh37-lite_PCAWG.fa
+
 # debug_mode is boolean key (True or False). When True, many intermediate files are remained for debugging.
 debug_mode: False
 
