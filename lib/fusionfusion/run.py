@@ -31,6 +31,14 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, Params):
                     outputFilePrefix + ".chimeric.clustered.splicing.contig.psl", stdout = FNULL, stderr = subprocess.STDOUT)
 
 
+    filterJunctionInfo.checkMatching(outputFilePrefix + ".chimeric.clustered.splicing.contig.psl",
+                                     outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt", Params)
+
+    filterJunctionInfo.filterContigCheck(outputFilePrefix + ".chimeric.clustered.splicing.txt",
+                                         outputFilePrefix + ".chimeric.clustered.filt2.txt",
+                                         outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt", Params)
+
+
 
 def main(args):
 

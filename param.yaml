@@ -26,3 +26,10 @@ min_cover_size: 50
 
 # the threshold of minimum chimeric transcript sizes
 min_chimeric_size: 1000
+
+
+# if contigs are aligned on other positions with less than the specified mismatch value, then the corresponding fusion transcipts are filtered
+min_allowed_contig_match_diff: 3
+
+# if contigs are aligned on within the specified size from the other breakpoint, then the corresponding fusion transcripts are filtered 
+check_contig_size_other_breakpoint: 1000

@@ -4,7 +4,7 @@ import re
 import regions, seq_utils
 
 regRe = re.compile(r'(\w+):(\d+)\-(\d+)')
-
+ReContig = re.compile(r'(\w+):([\+\-])(\d+)\-(\w+):([\+\-])(\d+)_contig([12])')
 
 def filterCoverRegion(inputFilePath, outputFilePath, Params):
 
@@ -453,4 +453,124 @@ def makeJucSeqPairFa(inputFilePath, outputFilePath, Params):
     hIN.close()
     hOUT.close()
 
+
+
+def checkMatching(inputFilePath, outputFilePath, Params):
+
+    min_allowed_contig_match_diff = Params["min_allowed_contig_match_diff"]
+    check_contig_size_other_breakpoint = Params["check_contig_size_other_breakpoint"]
+
+    hIN = open(inputFilePath, 'r')
+    hOUT = open(outputFilePath, 'w')
+
+    
+    tempID = ""
+    for line in hIN:
+        F = line.rstrip('\n').split('\t')
+
+        if re.match(r'^\d', F[0]) is None: continue
+
+        if F[9] != tempID:
+            if tempID != "":
+                otherMatch = []
+                for site, value in sorted(site2Match.items(), key = lambda x: x[1], reverse=True):
+                    if site == targetAln: continue
+                    if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
+                    if len(otherMatch) >= 10: break
+                otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
+                print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch)
+
+            tempID = F[9]
+            targetAln = "---"
+            targetScore= 0
+            site2Match = {}
+            crossMatch = 0
+
+        site2Match[F[13] + ':' + str(int(F[15]) + 1) + '-' + F[16]] = int(F[0])
+
+        chr1, strand1, pos1, chr2, strand2, pos2, contigNum = "", "", "", "", "", "", 0
+        contigMatch = ReContig.match(F[9])
+        if contigMatch is None:
+            print >> sys.stderr, "the format of the fasta name is inconsistent at"
+            print >> sys.stderr, '\t'.join(F)
+
+        contigNum = contigMatch.group(7)
+        if contigNum == "1":
+            chr1, strand1, pos1, chr2, strand2, pos2 = contigMatch.group(1), contigMatch.group(2), int(contigMatch.group(3)), contigMatch.group(4), contigMatch.group(5), int(contigMatch.group(6))
+        elif contigNum == "2":
+            chr1, strand1, pos1, chr2, strand2, pos2 = contigMatch.group(4), contigMatch.group(5), int(contigMatch.group(6)), contigMatch.group(1), contigMatch.group(2), int(contigMatch.group(3))
+
+        if chr1 == F[13]:
+            if (strand1 == "+" and F[8] == "-" and abs(pos1 - int(F[16])) < 5) or (strand1 == "-" and F[8] == "+" and abs(pos1 - 1 - int(F[15])) < 5):
+                if tempID == "chr17:-58342773-chr17:+58679979_contig2":
+                    pass
+
+                targetAln = F[13] + ':' + str(int(F[15]) + 1) + '-' + F[16] 
+                targetScore= int(F[0])
+
+        if chr2 == F[13] and (pos2 >= int(F[15]) - check_contig_size_other_breakpoint and pos2 <= int(F[16]) + check_contig_size_other_breakpoint):
+            crossMatch = float(F[0]) / float(F[10])
+
+
+    hIN.close()
+
+
+    otherMatch = []
+    for site, value in sorted(site2Match.items(), key = lambda x: x[1], reverse=True):
+        if site == targetAln: continue
+        if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
+        if len(otherMatch) >= 10: break
+    otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
+    print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch)
+
+    hOUT.close()
+
+
+
+def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile, Params):
+
+
+    hIN = open(checkMatchFile, 'r')
+    key2match1 = {}
+    key2match2 = {}
+    for line in hIN:
+        F = line.rstrip('\n').split('\t')
+        keyMatch = ReContig.match(F[0])
+
+        chr1, strand1, pos1, chr2, strand2, pos2, contigNum = keyMatch.group(1), keyMatch.group(2), keyMatch.group(3), keyMatch.group(4), keyMatch.group(5), keyMatch.group(6), keyMatch.group(7)
+
+        if contigNum == "1":
+            key2match1['\t'.join([chr1, pos1, strand1, chr2, pos2, strand2])] = '\t'.join(F[1:4])
+
+        if contigNum == "2":
+            key2match2['\t'.join([chr1, pos1, strand1, chr2, pos2, strand2])] = '\t'.join(F[1:4])
+
+    hIN.close()
+
+
+    hIN = open(inputFilePath, 'r')
+    hOUT = open(outputFilePath, 'w')
+
+    for line in hIN:
+        F = line.rstrip('\n').split('\t')
+
+        # temporary treatment
+        if F[0] == "chrM" or F[3] == "chrM": continue
+
+        key = '\t'.join(F[0:6])
+
+        match1 = (key2match1[key] if key in key2match1 else "---\t---\t---")
+        match2 = (key2match2[key] if key in key2match2 else "---\t---\t---") 
+
+        matches1 = match1.split('\t')
+        matches2 = match2.split('\t')
+
+        if matches1[0] == "---" or matches2[0] == "---": continue
+        if matches1[1] != "---" or matches2[1] != "---": continue
+        if float(matches1[2]) > 0 or float(matches2[2]) > 0: continue
+
+        print >> hOUT, key + '\t' + F[6] + '\t' + F[7] + '\t' +  match1 + '\t' + match2
+
+    hIN.close()
+    hOUT.close()
 
