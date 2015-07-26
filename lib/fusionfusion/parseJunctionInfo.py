@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import re
+import cigar_utils
 
 # for mapsplice2
 ReFus_ms2 = re.compile('FUS_(\d+)_(\d+)\(([\-\+])([\-\+])\)')
@@ -9,11 +10,11 @@ ReFus_ms2 = re.compile('FUS_(\d+)_(\d+)\(([\-\+])([\-\+])\)')
 cigarSRe_right = re.compile('(\d+)S$')
 cigarSRe_left = re.compile('^(\d+)S')
 
-abnormal_insert_size = 500000
-min_major_clip_size = 15 
 
 
-def getFusInfo_ms2(tempLine, fusInfo):
+def getFusInfo_ms2(tempLine, fusInfo, Params):
+
+    abnormal_insert_size = Params["abnormal_insert_size"]
 
     # check the fusion validity
     ufusInfo = list(set(fusInfo))
@@ -36,21 +37,21 @@ def getFusInfo_ms2(tempLine, fusInfo):
                 pos_chimera = FF[3]
                 dir_chimera = ("+" if flags[4] != "1" else "-")
                 mq_chimera = FF[4]
-                cover_chimera = myCigar.getCoverRegion(FF[2], FF[3], FF[5])
+                cover_chimera = cigar_utils.getCoverRegion(FF[2], FF[3], FF[5])
                 if fusOrder == 0: fusOrder = -1
             elif flags[8] != "1" and fusInfo[i] == fus:
                 chr_primary = FF[2]
                 pos_primary = FF[3]
                 dir_primary = ("+" if flags[4] != "1" else "-")
                 mq_primary = FF[4]
-                cover_primary = myCigar.getCoverRegion(FF[2], FF[3], FF[5])
+                cover_primary = cigar_utils.getCoverRegion(FF[2], FF[3], FF[5])
                 if fusOrder == 0: fusOrder = 1
             elif flags[8] != "1" and flags[2] != "1" and (fusInfo[i] != fus or chr_primary != "*"):
                 chr_pair = FF[2]
                 pos_pair = FF[3]
                 dir_pair = ("+" if flags[4] != "1" else "-")
                 mq_pair = FF[4]
-                cover_pair = myCigar.getCoverRegion(FF[2], FF[3], FF[5])
+                cover_pair = cigar_utils.getCoverRegion(FF[2], FF[3], FF[5])
 
         if chr_primary == "*": continue
         fusSplit = fus.split(',')
@@ -81,7 +82,7 @@ def getFusInfo_ms2(tempLine, fusInfo):
 
 
 
-def parseJunctionInfo_ms2(inputFilePath, outputFilePath):
+def parseJunctionInfo_ms2(inputFilePath, outputFilePath, Params):
 
     """
     script for collecting short reads supporting fusion candidates in MapSplice2 sam file
@@ -102,7 +103,7 @@ def parseJunctionInfo_ms2(inputFilePath, outputFilePath):
 
         if tempID != F[0]:
             if fusInfo.count(0) != len(tempLine):
-                print >> hOUT, getFusInfo_ms2(tempLine, fusInfo)
+                print >> hOUT, getFusInfo_ms2(tempLine, fusInfo, Params)
 
             tempID = F[0]
             fusFlag = []
@@ -122,14 +123,17 @@ def parseJunctionInfo_ms2(inputFilePath, outputFilePath):
 
 
     if fusInfo.count(0) != len(tempLine):
-        print >> hOUT, getFusInfo_ms2(tempLine, fusInfo)
+        print >> hOUT, getFusInfo_ms2(tempLine, fusInfo, Params)
 
     hOUT.close()
 
 
 
-def getFusInfo_STAR(juncLine):
+def getFusInfo_STAR(juncLine, Params):
 
+    abnormal_insert_size = Params["abnormal_insert_size"]
+    min_major_clip_size = Params["min_major_clip_size"]
+ 
     """
     function for organizing and print junction information
     """
@@ -156,8 +160,8 @@ def getFusInfo_STAR(juncLine):
         pos_SA = int(F[3])
         dir_SA = ("-" if flags[4] == "1" else "+")
         mq_SA = F[4]
-        coverRegion_SA = myCigar.getCoverRegion(F[2], F[3], F[5])
-        endPos_SA = myCigar.getEndPos(pos_SA, F[5])
+        coverRegion_SA = cigar_utils.getCoverRegion(F[2], F[3], F[5])
+        endPos_SA = cigar_utils.getEndPos(pos_SA, F[5])
 
         flags_SA = flags
         if flags_SA[6] == flags_SA[7]: print >> sys.stderr, "The supplementary Read is both first and second reads at:" + '\n' + '\n'.join(juncLine)
@@ -186,9 +190,9 @@ def getFusInfo_STAR(juncLine):
             pos_primary = int(F[3])
             dir_primary = ("-" if flags[4] == "1" else "+")
             mq_primary = F[4]
-            coverRegion_primary = myCigar.getCoverRegion(F[2], F[3], F[5])
+            coverRegion_primary = cigar_utils.getCoverRegion(F[2], F[3], F[5])
             readLength_primary = len(F[9])
-            endPos_primary = myCigar.getEndPos(pos_primary, F[5])
+            endPos_primary = cigar_utils.getEndPos(pos_primary, F[5])
             readID_primary = F[0] + ("/1" if flags[6] == "1" else "/2")
 
             tempMatch = cigarSRe_right.search(F[5])
@@ -203,7 +207,7 @@ def getFusInfo_STAR(juncLine):
             pos_pair = int(F[3])
             dir_pair = ("-" if flags[4] == "1" else "+")
             mq_pair = F[4]
-            coverRegion_pair = myCigar.getCoverRegion(F[2], F[3], F[5])
+            coverRegion_pair = cigar_utils.getCoverRegion(F[2], F[3], F[5])
         else:
             print >> sys.stderr, "The following read is both first and second reads at:" + '\n' + line
 
@@ -354,8 +358,10 @@ def getFusInfo_STAR(juncLine):
 
 
 
-def parseJuncInfo_STAR(inputFilePath, outputFilePath):
+def parseJuncInfo_STAR(inputFilePath, outputFilePath, Params):
 
+    abnormal_insert_size = Params["abnormal_insert_size"]
+ 
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
@@ -368,7 +374,9 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath):
 
         if tempID != F[0]:
             if tempID != "" and len(tempLine) == 3:
-                print >> hOUT, getJuncInfo_STAR(tempLine)
+                tempFusInfo = getFusInfo_STAR(tempLine, Params)
+                if tempFusInfo is not None:
+                    print >> hOUT, tempFusInfo
 
             tempID = F[0]
             tempLine = []
@@ -379,7 +387,10 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath):
 
 
     if tempID != "" and len(tempLine) == 3:
-        print >> hOUT, getJuncInfoSTAR(tempLine)
+        tempFusInfo = getFusInfo_STAR(tempLine, Params)
+        if tempFusInfo is not None:
+            print >> hOUT, tempFusInfo
+
 
     hOUT.close()
 

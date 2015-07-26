@@ -14,6 +14,9 @@ debug_mode: False
 # the size of abnormal insert size. used for checking the consistency of paired read of breakpoint containing reads
 abnormal_insert_size: 500000
 
+# the minimum base of clipped bases for junction reads
+min_major_clip_size: 15
+
 
 # the threshold of supporting junction read pairs
 min_read_pair_num: 3

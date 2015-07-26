@@ -3,7 +3,7 @@
 from fusionfusion.run import *
 import argparse
 
-parser = argparse.ArgumentParser(prog = "EBFilter")
+parser = argparse.ArgumentParser(prog = "fusionfusion")
 
 parser.add_argument("--version", action = "version", version = "fusionfusion-0.1.0")
 
@@ -13,12 +13,12 @@ parser.add_argument("--star", metavar = "star_chimera.bam", default = None, type
 parser.add_argument("--ms2", metavar = "ms2.bam", default = None, type = str,
                     help = "the path to the bam file by map-splice2")
 
-parser.add_argument("--out", metavar = "output_dir", default = None, type = str,
+parser.add_argument("--out", metavar = "output_dir", default = None, type = str, required=True,
                     help = "the path to the output directory")
 
-parser.add_argument("--param", metavar = "param.yaml", type = str,
+parser.add_argument("--param", metavar = "param.yaml", type = str, required=True,
                     help = "parameter information file (yaml format)")
 
 args = parser.parse_args()
 
-args.func(args)
+main(args)
