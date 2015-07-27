@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 
 
 wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz
