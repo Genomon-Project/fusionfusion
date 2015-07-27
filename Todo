@@ -1,4 +1,15 @@
 
-1. merge the raws with the same fusion and see the distribution of validityFlag
-2. utilize the merge filter used in genomon-SV
+2015 7/27
+
+short term
+1. check the possibility of STAR chimeric files and integrate them into the program
+2. reading the map-spice2 chimeric files
+3. merge map-splice2 and STAR result
+4. exon-intron junction boundary annotation
+5. organize documentation, docstrings
+
+mid term
+1. extensive comparison with Genomon Fusion results
+2. reading the Tophat2 chimeric files
+
 
