@@ -3,10 +3,12 @@
 import sys, os, argparse, subprocess, yaml
 import parseJunctionInfo
 import filterJunctionInfo
+import annotationFunction
 import utils
 
 def cluster_filter_junction(inputFilePath, outputFilePrefix, Params):
 
+    """
     parseJunctionInfo.clusterJuncInfo(inputFilePath,
                                       outputFilePrefix + ".chimeric.clustered.txt")
 
@@ -43,7 +45,9 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, Params):
                                          outputFilePrefix + ".chimeric.clustered.filt2.txt",
                                          outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt", Params)
 
-
+    """
+    annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt2.txt",
+                                           outputFilePrefix + ".fusion.result.txt", Params)
 
 def main(args):
 
