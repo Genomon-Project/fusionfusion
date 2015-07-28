@@ -11,6 +11,7 @@ reference_genome: /home/yshira/common/ref/hg19_all/hg19.all.fasta
 # debug_mode is boolean key (True or False). When True, many intermediate files are remained for debugging.
 debug_mode: False
 
+
 # the size of abnormal insert size. used for checking the consistency of paired read of breakpoint containing reads
 abnormal_insert_size: 500000
 
