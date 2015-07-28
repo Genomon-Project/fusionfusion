@@ -86,11 +86,14 @@ def main(args):
         hOUT = open(output_dir + "/ms2.chimeric.sam", "w")
         subprocess.call(["sort", "-k1", output_dir + "/ms2.chimeric.tmp.sam"], stdout = hOUT)
         hOUT.close()
-        """
 
         parseJunctionInfo.parseJuncInfo_ms2(output_dir + "/ms2.chimeric.sam", output_dir + "/ms2.chimeric.tmp.txt", paramConf) 
-        # utils.sortBedpe(output_dir + "/ms2.chimeric.tmp.bedpe", output_dir + "/ms2.chimeric.bedpe")
+        """
 
-        # cluster_filter_junction(output_dir + "/ms2.chimeric.bedpe", output_dir + "/ms2", paramConf)
+        hOUT = open(output_dir + "/ms2.chimeric.txt", "w")
+        subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/ms2.chimeric.tmp.txt"], stdout = hOUT)
+        hOUT.close()
+
+        cluster_filter_junction(output_dir + "/ms2.chimeric.txt", output_dir + "/ms2", paramConf)
 
 
