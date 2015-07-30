@@ -8,6 +8,8 @@ import utils
 
 def cluster_filter_junction(inputFilePath, outputFilePrefix, Params):
 
+    debug_mode = Params["debug_mode"]
+
     parseJunctionInfo.clusterJuncInfo(inputFilePath,
                                       outputFilePrefix + ".chimeric.clustered.txt")
 
@@ -47,6 +49,17 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, Params):
     annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt2.txt",
                                            outputFilePrefix + ".fusion.result.txt", Params)
 
+    # delete intermediate files
+    if debug_mode == False:
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.txt"])
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt1.txt"])
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt2.txt"])
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.txt"])
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.fa"])
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.psl"])
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt"])
+
+
 def main(args):
 
     starBamFile = args.star
@@ -59,6 +72,8 @@ def main(args):
     except yaml.YAMLError, exc:
         print "Error in sample information file:", exc
 
+
+    debug_mode = paramConf["debug_mode"])
 
     ####################
     # make direcotry
@@ -77,10 +92,13 @@ def main(args):
 
         cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star", paramConf)
 
+        if debug_mode == False:
+            subprocess.call(["rm", output_dir + "/star.chimeric.tmp.txt"])
+            subprocess.call(["rm", output_dir + "/star.chimeric.txt"])
+
 
     if ms2BamFile is not None:
    
-        """ 
         parseJunctionInfo.extractFusionReads_ms2(ms2BamFile, output_dir + "/ms2.chimeric.tmp.sam", paramConf)
 
         hOUT = open(output_dir + "/ms2.chimeric.sam", "w")
@@ -88,7 +106,6 @@ def main(args):
         hOUT.close()
 
         parseJunctionInfo.parseJuncInfo_ms2(output_dir + "/ms2.chimeric.sam", output_dir + "/ms2.chimeric.tmp.txt", paramConf) 
-        """
 
         hOUT = open(output_dir + "/ms2.chimeric.txt", "w")
         subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/ms2.chimeric.tmp.txt"], stdout = hOUT)
@@ -96,4 +113,9 @@ def main(args):
 
         cluster_filter_junction(output_dir + "/ms2.chimeric.txt", output_dir + "/ms2", paramConf)
 
+        if debug_mode == False:
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.sam"])
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.sam"])
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.txt"])
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.txt"])
 
