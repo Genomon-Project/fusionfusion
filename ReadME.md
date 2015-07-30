@@ -41,6 +41,13 @@ alignments.sam (bam)
 ```
 You do not need to care about the sorting status.
 
+Then, gene and exon annotation bed file should be prepared.
+The easiest way is
+```
+cd resource
+bash prepGeneInfo.sh
+```
+
 Then, a configuration files (in yaml format) should be prepared.
 ```
 param.yaml
@@ -64,17 +71,10 @@ fusionfusion --star star_chimera.bam --ms2 ms2.bam --out output_dir --param para
 1. coordinate for the 2nd breakpoint
 1. direction of the 2nd breakpoint
 1. inserted nucleotides within the breakpoints
-1. type of the structural variation
+1. #read_pairs supporting the variant (variant read paris)
 1. gene overlapping the 1st breakpoint
 1. gene overlapping the 2nd breakpoint
-1. exon overlapping the 1st breakpoint
-1. exon overlapping the 2nd breakpoint
-1. #read_pairs not supporting the variant (reference read pairs) for the tumor sample
-1. #read_pairs supporting the variant (variant read paris) for the tumor sample
-1. #read_pairs not supporting the variant for the matched control sample
-1. #read_pairs supporting the variant for the matched control sample
-1. frequency of variant read pairs for the tumor sample 
-1. frequency of variant read pairs for the matched control sample 
-1. p-value for the Fisher's exact text (on contingency table of (tumor v.s. matched control) and (reference v.s. variant read pairs)
+1. exon-intron junction overlapping the 1st breakpoint
+1. exon-intron junction overlapping the 2nd breakpoint
 
 
