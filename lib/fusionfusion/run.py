@@ -3,6 +3,7 @@
 import sys, os, argparse, subprocess, yaml
 import parseJunctionInfo
 import filterJunctionInfo
+import annotationFunction
 import utils
 
 def cluster_filter_junction(inputFilePath, outputFilePrefix, Params):
@@ -43,7 +44,8 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, Params):
                                          outputFilePrefix + ".chimeric.clustered.filt2.txt",
                                          outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt", Params)
 
-
+    annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt2.txt",
+                                           outputFilePrefix + ".fusion.result.txt", Params)
 
 def main(args):
 
@@ -67,22 +69,31 @@ def main(args):
     # parsing chimeric reads from bam files
     if starBamFile is not None:
 
-        """
         parseJunctionInfo.parseJuncInfo_STAR(starBamFile, output_dir + "/star.chimeric.tmp.txt", paramConf)
 
         hOUT = open(output_dir + "/star.chimeric.txt", "w")
         subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/star.chimeric.tmp.txt"], stdout = hOUT)
         hOUT.close()
-        """
 
         cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star", paramConf)
 
 
     if ms2BamFile is not None:
+   
+        """ 
+        parseJunctionInfo.extractFusionReads_ms2(ms2BamFile, output_dir + "/ms2.chimeric.tmp.sam", paramConf)
 
-        parseJunctionInfo.parseJuncInfo_STAR(ms2BamFile, output_dir + "/ms2.chimeric.tmp.bedpe", paramConf) 
-        utils.sortBedpe(output_dir + "/ms2.chimeric.tmp.bedpe", output_dir + "/ms2.chimeric.bedpe")
+        hOUT = open(output_dir + "/ms2.chimeric.sam", "w")
+        subprocess.call(["sort", "-k1", output_dir + "/ms2.chimeric.tmp.sam"], stdout = hOUT)
+        hOUT.close()
 
-        cluster_filter_junction(output_dir + "/ms2.chimeric.bedpe", output_dir + "/ms2", paramConf)
+        parseJunctionInfo.parseJuncInfo_ms2(output_dir + "/ms2.chimeric.sam", output_dir + "/ms2.chimeric.tmp.txt", paramConf) 
+        """
+
+        hOUT = open(output_dir + "/ms2.chimeric.txt", "w")
+        subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/ms2.chimeric.tmp.txt"], stdout = hOUT)
+        hOUT.close()
+
+        cluster_filter_junction(output_dir + "/ms2.chimeric.txt", output_dir + "/ms2", paramConf)
 
 

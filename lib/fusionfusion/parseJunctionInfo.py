@@ -1,7 +1,9 @@
 #! /usr/bin/env python
 
+import sys
 import re
 import cigar_utils
+import pysam
 
 # for mapsplice2
 ReFus_ms2 = re.compile('FUS_(\d+)_(\d+)\(([\-\+])([\-\+])\)')
@@ -11,8 +13,37 @@ cigarSRe_right = re.compile('(\d+)S$')
 cigarSRe_left = re.compile('^(\d+)S')
 
 
+def extractFusionReads_ms2(inputFilePath, outputFilePath, Params):
 
-def getFusInfo_ms2(tempLine, fusInfo, Params):
+    inBamFile = pysam.AlignmentFile(inputFilePath, "r") 
+
+    fusionReadID = {}
+    for read in inBamFile.fetch():
+
+        for item in read.tags:
+            if item[0] == "ZF" and ReFus_ms2.search(item[1]) is not None:
+                fusionReadID[read.qname] = 1
+
+    
+    # it seem that reset can be used only for indexed bam files...
+    # inBamFile.reset() # 
+
+    inBamFile.close()
+
+    inBamFile = pysam.AlignmentFile(inputFilePath, "r")
+    outBamFile = pysam.AlignmentFile(outputFilePath, "w", template = inBamFile)
+    for read in inBamFile.fetch():
+        
+        if read.qname in fusionReadID:
+            outBamFile.write(read)
+
+
+    inBamFile.close()
+    outBamFile.close()
+
+    
+
+def getFusInfo_ms2(tempID, tempLine, fusInfo, Params):
 
     abnormal_insert_size = Params["abnormal_insert_size"]
 
@@ -80,9 +111,7 @@ def getFusInfo_ms2(tempLine, fusInfo, Params):
 
 
 
-
-
-def parseJunctionInfo_ms2(inputFilePath, outputFilePath, Params):
+def parseJuncInfo_ms2(inputFilePath, outputFilePath, Params):
 
     """
     script for collecting short reads supporting fusion candidates in MapSplice2 sam file
@@ -103,7 +132,9 @@ def parseJunctionInfo_ms2(inputFilePath, outputFilePath, Params):
 
         if tempID != F[0]:
             if fusInfo.count(0) != len(tempLine):
-                print >> hOUT, getFusInfo_ms2(tempLine, fusInfo, Params)
+                tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo, Params)
+                if tempFusInfo is not None:
+                    print >> hOUT, tempFusInfo
 
             tempID = F[0]
             fusFlag = []
@@ -111,7 +142,7 @@ def parseJunctionInfo_ms2(inputFilePath, outputFilePath, Params):
             tempLine = [] 
     
         tempLine.append(line)
-        mFus = ReFus.search('\t'.join(F[11:]))
+        mFus = ReFus_ms2.search('\t'.join(F[11:]))
         if mFus is not None:
             fusFlag.append(1)
             fusInfo.append(','.join([mFus.group(1), mFus.group(2), mFus.group(3), mFus.group(4)]))
@@ -123,7 +154,10 @@ def parseJunctionInfo_ms2(inputFilePath, outputFilePath, Params):
 
 
     if fusInfo.count(0) != len(tempLine):
-        print >> hOUT, getFusInfo_ms2(tempLine, fusInfo, Params)
+        tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo, Params)
+        if tempFusInfo is not None:
+            print >> hOUT, tempFusInfo
+
 
     hOUT.close()
 

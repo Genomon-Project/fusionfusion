@@ -11,6 +11,7 @@ reference_genome: /home/yshira/common/ref/hg19_all/hg19.all.fasta
 # debug_mode is boolean key (True or False). When True, many intermediate files are remained for debugging.
 debug_mode: False
 
+
 # the size of abnormal insert size. used for checking the consistency of paired read of breakpoint containing reads
 abnormal_insert_size: 500000
 
@@ -36,3 +37,14 @@ min_allowed_contig_match_diff: 3
 
 # if contigs are aligned on within the specified size from the other breakpoint, then the corresponding fusion transcripts are filtered 
 check_contig_size_other_breakpoint: 1000
+
+# if two breakpoints are on the same gene, then the fusion candidate is filtered
+filter_same_gene: True
+
+
+# gene information bed file path
+gene_bed: resource/refGene.bed.gz
+
+# exon information bed file path
+exon_bed: resource/refExon.bed.gz
+
