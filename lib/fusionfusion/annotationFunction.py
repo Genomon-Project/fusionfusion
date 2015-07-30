@@ -8,9 +8,11 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
     hOUT = open(outputFilePath, 'w')
 
     gene_bed = Params["gene_bed"] 
+    exon_bed = Params["exon_bed"]
     filter_same_gene = Params["filter_same_gene"]
 
     gene_tb = pysam.TabixFile(gene_bed)
+    exon_tb = pysam.TabixFile(exon_bed)
 
     for line in hIN:
 
@@ -36,6 +38,30 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
         ##########
 
         ##########
+        # check exon-intron junction annotation for the side 1  
+        tabixErrorFlag = 0
+        try:
+            records = exon_tb.fetch(F[0], int(F[1]) - 5, int(F[1]) + 5)
+        except Exception as inst:
+            print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+            tabixErrorFlag = 1
+        
+        junction1 = [] 
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                if abs(int(F[1]) - int(record[1])) < junction_margin:
+                    if record[5] == "+": junction1.append(record[3] + ".start")
+                    if record[5] == "-": junction1.append(record[3] + ".end")
+                if abs(int(F[1]) - int(record[2])) < junction_margin:
+                    if record[5] == "+": junction1.append(record[3] + ".end")
+                    if record[5] == "-": junction1.append(record[3] + ".start") 
+
+        if len(junction1) == 0: junction1.append("---")
+            junction1 = list(set(junction1))
+        ##########
+
+        ##########
         # check gene annotation for the side 2
         tabixErrorFlag = 0
         try:
@@ -54,6 +80,31 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
         gene2 = list(set(gene2))
         ##########
 
+        ##########
+        # check exon-intron junction annotation for the side 2  
+        tabixErrorFlag = 0
+        try:
+            records = exon_tb.fetch(F[3], int(F[4]) - 5, int(F[4]) + 5)
+        except Exception as inst:
+            print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+            tabixErrorFlag = 1
+
+        junction2 = []
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                if abs(int(F[4]) - int(record[1])) < junction_margin:
+                    if record[5] == "+": junction2.append(record[3] + ".start")
+                    if record[5] == "-": junction2.append(record[3] + ".end")
+                if abs(int(F[4]) - int(record[2])) < junction_margin:
+                    if record[5] == "+": junction2.append(record[3] + ".end")
+                    if record[5] == "-": junction2.append(record[3] + ".start")
+
+        if len(junction1) == 0: junction1.append("---")
+            junction1 = list(set(junction1))
+        ##########
+
+
         sameGeneFlag = 0
         for g1 in gene1:
             for g2 in gene2:
@@ -61,7 +112,9 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
 
         if filter_same_gene == True and sameGeneFlag == 1: continue
 
-        print >> hOUT, '\t'.join(F[0:8]) + '\t' + ';'.join(gene1) + '\t' + ';'.join(gene2) 
+        print >> hOUT, '\t'.join(F[0:8]) + '\t' + ';'.join(gene1) + '\t' + ';'.join(gene2) + '\t' + ';'.join(junction1) + '\t' + ';'.join(junction2)
+
+ 
      
 
 
