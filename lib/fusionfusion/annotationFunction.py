@@ -2,6 +2,8 @@
 
 import sys, pysam
 
+junction_margin = 5
+
 def filterAndAnnotation(inputFilePath, outputFilePath, Params):
 
     hIN = open(inputFilePath, 'r')
@@ -41,7 +43,7 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
         # check exon-intron junction annotation for the side 1  
         tabixErrorFlag = 0
         try:
-            records = exon_tb.fetch(F[0], int(F[1]) - 5, int(F[1]) + 5)
+            records = exon_tb.fetch(F[0], int(F[1]) - junction_margin, int(F[1]) + junction_margin)
         except Exception as inst:
             print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
             tabixErrorFlag = 1
@@ -58,7 +60,7 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
                     if record[5] == "-": junction1.append(record[3] + ".start") 
 
         if len(junction1) == 0: junction1.append("---")
-            junction1 = list(set(junction1))
+        junction1 = list(set(junction1))
         ##########
 
         ##########
@@ -84,7 +86,7 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
         # check exon-intron junction annotation for the side 2  
         tabixErrorFlag = 0
         try:
-            records = exon_tb.fetch(F[3], int(F[4]) - 5, int(F[4]) + 5)
+            records = exon_tb.fetch(F[3], int(F[4]) - junction_margin, int(F[4]) + junction_margin)
         except Exception as inst:
             print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
             tabixErrorFlag = 1
@@ -100,8 +102,8 @@ def filterAndAnnotation(inputFilePath, outputFilePath, Params):
                     if record[5] == "+": junction2.append(record[3] + ".end")
                     if record[5] == "-": junction2.append(record[3] + ".start")
 
-        if len(junction1) == 0: junction1.append("---")
-            junction1 = list(set(junction1))
+        if len(junction2) == 0: junction2.append("---")
+        junction2 = list(set(junction2))
         ##########
 
 
