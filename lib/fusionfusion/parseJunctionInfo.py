@@ -478,9 +478,10 @@ def clusterJuncInfo(inputFilePath, outputFilePath):
 
     hIN.close()
 
-    print >> hOUT, '\t'.join([tempKey, ';'.join(tempInseq), ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
-                    ';'.join(tempMQ_pair), ';'.join(tempCover_pair), ';'.join(tempDir_pair), \
-                     ';'.join(tempMQ_SA), ';'.join(tempCover_SA), ';'.join(tempDir_SA), ';'.join(tempPairPos), ';'.join(tempPrimaryPos)])
+    if tempKey != "":
+        print >> hOUT, '\t'.join([tempKey, ';'.join(tempInseq), ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
+                        ';'.join(tempMQ_pair), ';'.join(tempCover_pair), ';'.join(tempDir_pair), \
+                         ';'.join(tempMQ_SA), ';'.join(tempCover_SA), ';'.join(tempDir_SA), ';'.join(tempPairPos), ';'.join(tempPrimaryPos)])
 
     hOUT.close()
 

@@ -515,13 +515,14 @@ def checkMatching(inputFilePath, outputFilePath, Params):
     hIN.close()
 
 
-    otherMatch = []
-    for site, value in sorted(site2Match.items(), key = lambda x: x[1], reverse=True):
-        if site == targetAln: continue
-        if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
-        if len(otherMatch) >= 10: break
-    otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
-    print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch)
+    if tempID != "":
+        otherMatch = []
+        for site, value in sorted(site2Match.items(), key = lambda x: x[1], reverse=True):
+            if site == targetAln: continue
+            if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
+            if len(otherMatch) >= 10: break
+        otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
+        print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch)
 
     hOUT.close()
 
