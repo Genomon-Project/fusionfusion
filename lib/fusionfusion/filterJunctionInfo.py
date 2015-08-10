@@ -3,8 +3,8 @@
 import re
 import regions, seq_utils
 
-regRe = re.compile(r'(\w+):(\d+)\-(\d+)')
-ReContig = re.compile(r'(\w+):([\+\-])(\d+)\-(\w+):([\+\-])(\d+)_contig([12])')
+regRe = re.compile(r'([^ \t\n\r\f\v,]+):(\d+)\-(\d+)')
+ReContig = re.compile(r'([^ \t\n\r\f\v,]+):([\+\-])(\d+)\-([^ \t\n\r\f\v,]+):([\+\-])(\d+)_contig([12])')
 
 def filterCoverRegion(inputFilePath, outputFilePath, Params):
 
