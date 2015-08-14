@@ -5,6 +5,8 @@ import re
 import cigar_utils
 import pysam
 
+import config
+
 # for mapsplice2
 ReFus_ms2 = re.compile('FUS_(\d+)_(\d+)\(([\-\+])([\-\+])\)')
 
@@ -13,7 +15,7 @@ cigarSRe_right = re.compile('(\d+)S$')
 cigarSRe_left = re.compile('^(\d+)S')
 
 
-def extractFusionReads_ms2(inputFilePath, outputFilePath, Params):
+def extractFusionReads_ms2(inputFilePath, outputFilePath):
 
     inBamFile = pysam.AlignmentFile(inputFilePath, "r") 
 
@@ -43,9 +45,9 @@ def extractFusionReads_ms2(inputFilePath, outputFilePath, Params):
 
     
 
-def getFusInfo_ms2(tempID, tempLine, fusInfo, Params):
+def getFusInfo_ms2(tempID, tempLine, fusInfo):
 
-    abnormal_insert_size = Params["abnormal_insert_size"]
+    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
 
     # check the fusion validity
     ufusInfo = list(set(fusInfo))
@@ -111,7 +113,7 @@ def getFusInfo_ms2(tempID, tempLine, fusInfo, Params):
 
 
 
-def parseJuncInfo_ms2(inputFilePath, outputFilePath, Params):
+def parseJuncInfo_ms2(inputFilePath, outputFilePath):
 
     """
     script for collecting short reads supporting fusion candidates in MapSplice2 sam file
@@ -132,7 +134,7 @@ def parseJuncInfo_ms2(inputFilePath, outputFilePath, Params):
 
         if tempID != F[0]:
             if fusInfo.count(0) != len(tempLine):
-                tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo, Params)
+                tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo)
                 if tempFusInfo is not None:
                     print >> hOUT, tempFusInfo
 
@@ -154,7 +156,7 @@ def parseJuncInfo_ms2(inputFilePath, outputFilePath, Params):
 
 
     if fusInfo.count(0) != len(tempLine):
-        tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo, Params)
+        tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo)
         if tempFusInfo is not None:
             print >> hOUT, tempFusInfo
 
@@ -163,10 +165,10 @@ def parseJuncInfo_ms2(inputFilePath, outputFilePath, Params):
 
 
 
-def getFusInfo_STAR(juncLine, Params):
+def getFusInfo_STAR(juncLine):
 
-    abnormal_insert_size = Params["abnormal_insert_size"]
-    min_major_clip_size = Params["min_major_clip_size"]
+    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
+    min_major_clip_size = config.param_conf.getint("parse_condition", "min_major_clip_size")
  
     """
     function for organizing and print junction information
@@ -392,9 +394,9 @@ def getFusInfo_STAR(juncLine, Params):
 
 
 
-def parseJuncInfo_STAR(inputFilePath, outputFilePath, Params):
+def parseJuncInfo_STAR(inputFilePath, outputFilePath):
 
-    abnormal_insert_size = Params["abnormal_insert_size"]
+    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
  
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
@@ -408,7 +410,7 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath, Params):
 
         if tempID != F[0]:
             if tempID != "" and len(tempLine) == 3:
-                tempFusInfo = getFusInfo_STAR(tempLine, Params)
+                tempFusInfo = getFusInfo_STAR(tempLine)
                 if tempFusInfo is not None:
                     print >> hOUT, tempFusInfo
 
@@ -421,7 +423,7 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath, Params):
 
 
     if tempID != "" and len(tempLine) == 3:
-        tempFusInfo = getFusInfo_STAR(tempLine, Params)
+        tempFusInfo = getFusInfo_STAR(tempLine)
         if tempFusInfo is not None:
             print >> hOUT, tempFusInfo
 

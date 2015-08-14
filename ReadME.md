@@ -12,7 +12,7 @@ and integrating our software into the pipeline will come very easily to you!
 ## Dependency
 
 ### Python
-Python (>= 2.7), `pysam (>= 0.8.1)`, `pyyaml` packages
+Python (>= 2.7), `pysam (>= 0.8.1)` packages
 
 ### Software
 blat

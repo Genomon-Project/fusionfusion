@@ -2,16 +2,17 @@
 
 import sys, pysam
 
+import config
 junction_margin = 5
 
-def filterAndAnnotation(inputFilePath, outputFilePath, Params):
+def filterAndAnnotation(inputFilePath, outputFilePath):
 
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
-    gene_bed = Params["gene_bed"] 
-    exon_bed = Params["exon_bed"]
-    filter_same_gene = Params["filter_same_gene"]
+    gene_bed = config.param_conf.get("annotation", "gene_bed")
+    exon_bed = config.param_conf.get("annotation", "exon_bed")
+    filter_same_gene = config.param_conf.get("filter_condition", "filter_same_gene")
 
     gene_tb = pysam.TabixFile(gene_bed)
     exon_tb = pysam.TabixFile(exon_bed)

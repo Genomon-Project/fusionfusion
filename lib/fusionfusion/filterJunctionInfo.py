@@ -3,16 +3,18 @@
 import re
 import regions, seq_utils
 
+import config
+
 regRe = re.compile(r'([^ \t\n\r\f\v,]+):(\d+)\-(\d+)')
 ReContig = re.compile(r'([^ \t\n\r\f\v,]+):([\+\-])(\d+)\-([^ \t\n\r\f\v,]+):([\+\-])(\d+)_contig([12])')
 
-def filterCoverRegion(inputFilePath, outputFilePath, Params):
+def filterCoverRegion(inputFilePath, outputFilePath):
 
-    min_read_pair_num = Params["min_read_pair_num"]
-    min_valid_read_pair_ratio = Params["min_valid_read_pair_ratio"]
-    min_cover_size = Params["min_cover_size"]
-    min_chimeric_size = Params["min_chimeric_size"]
-
+    min_read_pair_num = config.param_conf.getint("filter_condition", "min_read_pair_num")
+    min_valid_read_pair_ratio = config.param_conf.getfloat("filter_condition", "min_valid_read_pair_ratio")
+    min_cover_size = config.param_conf.getint("filter_condition", "min_cover_size")
+    min_chimeric_size = config.param_conf.getint("filter_condition", "min_chimeric_size")
+    
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
@@ -84,9 +86,10 @@ def filterCoverRegion(inputFilePath, outputFilePath, Params):
     hOUT.close()
 
 
-def extractSplicingPattern(inputFilePath, outputFilePath, Params):
+def extractSplicingPattern(inputFilePath, outputFilePath):
 
-    reference_genome = Params['reference_genome']    
+    reference_genome = config.param_conf.get("alignment", "reference_genome")
+
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
@@ -436,7 +439,7 @@ def extractSplicingPattern(inputFilePath, outputFilePath, Params):
 
 
 
-def makeJucSeqPairFa(inputFilePath, outputFilePath, Params):
+def makeJucSeqPairFa(inputFilePath, outputFilePath):
 
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
@@ -455,10 +458,11 @@ def makeJucSeqPairFa(inputFilePath, outputFilePath, Params):
 
 
 
-def checkMatching(inputFilePath, outputFilePath, Params):
+def checkMatching(inputFilePath, outputFilePath):
 
-    min_allowed_contig_match_diff = Params["min_allowed_contig_match_diff"]
-    check_contig_size_other_breakpoint = Params["check_contig_size_other_breakpoint"]
+    min_allowed_contig_match_diff = config.param_conf.getint("filter_condition", "min_allowed_contig_match_diff")
+    check_contig_size_other_breakpoint = config.param_conf.getint("filter_condition", "check_contig_size_other_breakpoint")
+
 
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
@@ -528,7 +532,7 @@ def checkMatching(inputFilePath, outputFilePath, Params):
 
 
 
-def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile, Params):
+def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile):
 
 
     hIN = open(checkMatchFile, 'r')
