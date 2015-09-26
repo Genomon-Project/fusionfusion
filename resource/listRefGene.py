@@ -14,7 +14,7 @@ for line in hIN:
     strand = F[3]
     symbol = F[12]
 
-    # chr = chr.replace('chr', '')
+    chr = chr.replace('chr', '')
 
     key = chr + '\t' + start + '\t' + end
     print key + '\t' + symbol + '\t' + "0" + '\t' + strand

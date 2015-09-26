@@ -16,7 +16,7 @@ for line in hIN:
     gene = F[1]
     symbol = F[12]
 
-    # chr = chr.replace('chr', '')
+    chr = chr.replace('chr', '')
 
     for i in range(0, len(starts) - 1):
         key = chr + '\t' + starts[i] + '\t' + ends[i]

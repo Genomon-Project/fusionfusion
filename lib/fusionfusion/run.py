@@ -9,7 +9,7 @@ import utils
 import config
 
 def cluster_filter_junction(inputFilePath, outputFilePrefix):
-
+    
     debug_mode = config.param_conf.getboolean("debug", "debug_mode")
 
     parseJunctionInfo.clusterJuncInfo(inputFilePath,
@@ -39,7 +39,6 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix):
     if fRet != 0:
         print >> sys.stderr, "blat error, error code: " + str(fRet)
         sys.exit()
-
 
     filterJunctionInfo.checkMatching(outputFilePrefix + ".chimeric.clustered.splicing.contig.psl",
                                      outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt")
