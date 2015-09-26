@@ -46,7 +46,7 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix):
     filterJunctionInfo.filterContigCheck(outputFilePrefix + ".chimeric.clustered.splicing.txt",
                                          outputFilePrefix + ".chimeric.clustered.filt2.txt",
                                          outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt")
-    
+
     annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt2.txt",
                                            outputFilePrefix + ".fusion.result.txt")
 

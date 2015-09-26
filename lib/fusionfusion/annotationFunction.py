@@ -12,7 +12,7 @@ def filterAndAnnotation(inputFilePath, outputFilePath):
 
     gene_bed = config.param_conf.get("annotation", "gene_bed")
     exon_bed = config.param_conf.get("annotation", "exon_bed")
-    filter_same_gene = config.param_conf.get("filter_condition", "filter_same_gene")
+    filter_same_gene = config.param_conf.getboolean("filter_condition", "filter_same_gene")
 
     gene_tb = pysam.TabixFile(gene_bed)
     exon_tb = pysam.TabixFile(exon_bed)
