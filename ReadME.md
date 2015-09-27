@@ -32,7 +32,7 @@ First, you need to perform transcriptome sequencing alignemnt by STAR or MapSpli
 
 For STAR, our software uses the chimeric sam file
 ```
-Chimeric.out.sam
+{output_prefix}.Chimeric.out.sam
 ```
 
 For MapSplice 2, our software uses the read alignment file
@@ -50,7 +50,7 @@ bash prepGeneInfo.sh
 
 Then, a configuration files (in yaml format) should be prepared.
 ```
-param.yaml
+param.cfg
 ```
 
 See sample files for description of each parameters.
@@ -59,8 +59,10 @@ See sample files for description of each parameters.
 
 
 ```
-fusionfusion --star star_chimera.bam --ms2 ms2.bam --out output_dir --param param.yaml
+fusionfusion --star star_chimera.bam --ms2 ms2.bam --out output_dir --param param.cfg
 ```
+At least one of --star or --ms2 arguments should be specified.
+The other arguments are mandatory.
 
 ## Results
 
