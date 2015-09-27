@@ -59,7 +59,7 @@ See sample files for description of each parameters.
 
 
 ```
-fusionfusion --star star_chimera.bam --ms2 ms2.bam --out output_dir --param param.cfg
+fusionfusion --star star.Chimeric.out.sam --ms2 ms2.bam --out output_dir --param param.cfg
 ```
 At least one of --star or --ms2 arguments should be specified.
 The other arguments are mandatory.
