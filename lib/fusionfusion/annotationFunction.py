@@ -115,11 +115,8 @@ def filterAndAnnotation(inputFilePath, outputFilePath):
 
         if filter_same_gene == True and sameGeneFlag == 1: continue
 
-        print >> hOUT, '\t'.join(F[0:8]) + '\t' + ';'.join(gene1) + '\t' + ';'.join(gene2) + '\t' + ';'.join(junction1) + '\t' + ';'.join(junction2)
-
- 
-     
-
+        print >> hOUT, '\t'.join(F[0:8]) + '\t' + ';'.join(gene1) + '\t' + ';'.join(junction1) + '\t' + ';'.join(gene2) + '\t' + ';'.join(junction2) + '\t' + \
+                         F[11] + '\t' + F[12] + '\t' + F[16] + '\t' + F[17]
 
     hIN.close()
     hOUT.close()

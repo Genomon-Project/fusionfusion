@@ -481,7 +481,7 @@ def checkMatching(inputFilePath, outputFilePath):
                     if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
                     if len(otherMatch) >= 10: break
                 otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
-                print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore)
+                print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore) + '\t' + str(targetSize)
 
             tempID = F[9]
             targetAln = "---"
@@ -510,6 +510,7 @@ def checkMatching(inputFilePath, outputFilePath):
 
                 targetAln = F[13] + ':' + str(int(F[15]) + 1) + '-' + F[16] 
                 targetScore= int(F[0])
+                targetSize = int(F[10])
 
         if chr2 == F[13] and (pos2 >= int(F[15]) - check_contig_size_other_breakpoint and pos2 <= int(F[16]) + check_contig_size_other_breakpoint):
             crossMatch = float(F[0]) / float(F[10])
@@ -525,7 +526,7 @@ def checkMatching(inputFilePath, outputFilePath):
             if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
             if len(otherMatch) >= 10: break
         otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
-        print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore)
+        print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore) + '\t' + str(targetSize)
 
     hOUT.close()
 
@@ -545,10 +546,10 @@ def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile):
         chr1, strand1, pos1, chr2, strand2, pos2, contigNum = keyMatch.group(1), keyMatch.group(2), keyMatch.group(3), keyMatch.group(4), keyMatch.group(5), keyMatch.group(6), keyMatch.group(7)
 
         if contigNum == "1":
-            key2match1['\t'.join([chr1, pos1, strand1, chr2, pos2, strand2])] = '\t'.join(F[1:5])
+            key2match1['\t'.join([chr1, pos1, strand1, chr2, pos2, strand2])] = '\t'.join(F[1:6])
 
         if contigNum == "2":
-            key2match2['\t'.join([chr1, pos1, strand1, chr2, pos2, strand2])] = '\t'.join(F[1:5])
+            key2match2['\t'.join([chr1, pos1, strand1, chr2, pos2, strand2])] = '\t'.join(F[1:6])
 
     hIN.close()
 
@@ -561,8 +562,8 @@ def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile):
 
         key = '\t'.join(F[0:6])
 
-        match1 = (key2match1[key] if key in key2match1 else "---\t---\t---\t---")
-        match2 = (key2match2[key] if key in key2match2 else "---\t---\t---\t---") 
+        match1 = (key2match1[key] if key in key2match1 else "---\t---\t---\t---\t---")
+        match2 = (key2match2[key] if key in key2match2 else "---\t---\t---\t---\t---") 
 
         matches1 = match1.split('\t')
         matches2 = match2.split('\t')
@@ -570,7 +571,7 @@ def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile):
         if matches1[0] == "---" or matches2[0] == "---": continue
         if matches1[1] != "---" or matches2[1] != "---": continue
         if float(matches1[2]) > 0 or float(matches2[2]) > 0: continue
-        if int(matches1[3]) < min_cover_size or int(matches2[3]) < min_cover_size: continue
+        # if int(matches1[3]) < min_cover_size or int(matches2[3]) < min_cover_size: continue
 
         print >> hOUT, key + '\t' + F[6] + '\t' + F[7] + '\t' +  match1 + '\t' + match2
 
