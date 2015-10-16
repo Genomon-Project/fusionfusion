@@ -4,7 +4,7 @@ import sys
 import re
 import cigar_utils
 import pysam
-
+import collections
 import config
 
 # for mapsplice2
@@ -437,53 +437,124 @@ def clusterJuncInfo(inputFilePath, outputFilePath):
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
-    tempKey = ""
+    # I believe this is appropriate..
+    check_margin_size = 30
+
+    cluster_junc = {}
+    cluster_inseq, cluster_id, cluster_pair_pos, cluster_primary_pos = {}, {}, {}, {}
+    cluster_MQ_primary, cluser_cover_primary, cluster_dir_primary = {}, {}, {}
+    cluster_MQ_pair, cluster_cover_pair, cluster_dir_pair = {}, {}, {}
+    cluster_MQ_SA, cluster_cover_SA, cluster_dir_SA = {}, {}, {}
+
     for line in hIN:
+ 
         F = line.rstrip('\n').split('\t')
-        key = '\t'.join(F[0:6])
+        match = 0
+        delList = []
 
-        if tempKey != key:
-            if tempKey != "":
-                print >> hOUT,'\t'.join([tempKey, ';'.join(tempInseq), ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
-                                ';'.join(tempMQ_pair), ';'.join(tempCover_pair), ';'.join(tempDir_pair), \
-                                 ';'.join(tempMQ_SA), ';'.join(tempCover_SA), ';'.join(tempDir_SA), ';'.join(tempPairPos), ';'.join(tempPrimaryPos)])
-            
+        for key in sorted(cluster_junc):
+            tchr1, tpos1, tdir1, tchr2, tpos2, tdir2, inseq_size = key.split('\t')
 
-            tempKey = key
-            tempIDs = []
-            tempInseq = []
-            tempMQ_primary = []
-            tempCover_primary = []
-            tempDir_primary = []
-            tempMQ_pair = []
-            tempCover_pair = []
-            tempDir_pair = []
-            tempMQ_SA = []
-            tempCover_SA = []
-            tempDir_SA = []
-            tempPairPos = []
-            tempPrimaryPos = []
+            # the investigated key is sufficiently far from the current line in the input file and no additional line to merge is expected. therefore flush the key and information
+            if F[0] != tchr1 or int(F[1]) > int(tpos1) + check_margin_size:
 
-        tempInseq.append(F[6])
-        tempIDs.append(F[7])
-        tempMQ_primary.append(F[8])
-        tempCover_primary.append(F[9])
-        tempDir_primary.append(F[10])
-        tempMQ_pair.append(F[11])
-        tempCover_pair.append(F[12])
-        tempDir_pair.append(F[13])
-        tempMQ_SA.append(F[14])
-        tempCover_SA.append(F[15])
-        tempDir_SA.append(F[16])
-        tempPairPos.append(F[17])
-        tempPrimaryPos.append(F[18])
+                # obtain the most frequent junction
+                junc_counter = collections.Counter(cluster_junc[key])
+                best_junc = junc_counter.most_common(1)[0][0]
+                btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq = best_junc.split('\t') 
+
+                print >> hOUT, '\t'.join([btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq, \
+                                    ';'.join(cluster_id[key]), ';'.join(cluster_MQ_primary[key]), ';'.join(cluser_cover_primary[key]), ';'.join(cluster_dir_primary[key]), \
+                                    ';'.join(cluster_MQ_pair[key]), ';'.join(cluster_cover_pair[key]), ';'.join(cluster_dir_pair[key]), \
+                                    ';'.join(cluster_MQ_SA[key]), ';'.join(cluster_cover_SA[key]), ';'.join(cluster_dir_SA[key]), \
+                                    ';'.join(cluster_pair_pos[key]), ';'.join(cluster_primary_pos[key])])
+
+
+                # add to the deletion list (later the key will be removed from the dictionaries)
+                delList.append(key)
+                continue
+
+            else:
+
+                # check whether the investigated key and the current line should be merged or not
+                if F[0] == tchr1 and F[3] == tchr2 and F[2] == tdir1 and F[5] == tdir2:
+
+                    flag = 0
+                    temp_seq_size = 0 if F[6] == "---" else len(F[6])
+                    # detailed check on the junction position considering inserted sequences
+                    if F[2] == "+":
+                        expected_diff_size = (int(F[1]) - int(tpos1)) + (temp_seq_size - int(inseq_size))
+                        if (F[5] == "+" and int(F[4]) == int(tpos2) - expected_diff_size) or (F[5] == "-" and int(F[4]) == int(tpos2) + expected_diff_size):
+                            flag = 1
+                    else:
+                        expected_diff_size = (int(F[1]) - int(tpos1)) + (int(inseq_size) - temp_seq_size)
+                        if (F[5] == "+" and int(F[4]) == int(tpos2) + expected_diff_size) or (F[5] == "-" and int(F[4]) == int(tpos2) - expected_diff_size):
+                            flag = 1
+
+                    if flag == 1:
+
+                        match = 1
+                        cluster_inseq[key].append(F[6])
+                        cluster_id[key].append(F[7])
+                        cluster_MQ_primary[key].append(F[8])
+                        cluser_cover_primary[key].append(F[9])
+                        cluster_dir_primary[key].append(F[10])
+                        cluster_MQ_pair[key].append(F[11])
+                        cluster_cover_pair[key].append(F[12])
+                        cluster_dir_pair[key].append(F[13])
+                        cluster_MQ_SA[key].append(F[14])
+                        cluster_cover_SA[key].append(F[15])
+                        cluster_dir_SA[key].append(F[16])
+                        cluster_pair_pos[key].append(F[17])
+                        cluster_primary_pos[key].append(F[18])
+
+                        # whether to check whether the inserted sequence should be reverse-complemented?
+                        cluster_junc[key].append('\t'.join(F[0:7]))
+
+        for key in delList:
+            del cluster_junc[key]
+            del cluster_inseq[key]
+            del cluster_id[key]
+            del cluster_MQ_primary[key]
+            del cluser_cover_primary[key]
+            del cluster_dir_primary[key]
+            del cluster_MQ_pair[key]
+            del cluster_cover_pair[key]
+            del cluster_dir_pair[key]
+            del cluster_MQ_SA[key]
+            del cluster_cover_SA[key]
+            del cluster_dir_SA[key]
+            del cluster_pair_pos[key]
+            del cluster_primary_pos[key]
+
+        # if the current line in the input file does not match any of the pooled keys
+        if match == 0:
+            temp_seq_size = 0 if F[6] == "---" else len(F[6])
+            key = '\t'.join(F[0:6] + [str(temp_seq_size)])
+            # whether to check whether the inserted sequence should be reverse-complemented?
+            cluster_junc[key] = ['\t'.join(F[0:7])]
+
+            cluster_inseq[key], cluster_id[key] = [F[6]], [F[7]]
+            cluster_MQ_primary[key], cluser_cover_primary[key], cluster_dir_primary[key] = [F[8]], [F[9]], [F[10]]
+            cluster_MQ_pair[key], cluster_cover_pair[key], cluster_dir_pair[key] = [F[11]], [F[12]], [F[13]]
+            cluster_MQ_SA[key], cluster_cover_SA[key], cluster_dir_SA[key] = [F[14]], [F[15]], [F[16]]
+            cluster_pair_pos[key], cluster_primary_pos[key] = [F[17]], [F[18]]
 
     hIN.close()
 
-    if tempKey != "":
-        print >> hOUT, '\t'.join([tempKey, ';'.join(tempInseq), ';'.join(tempIDs),  ';'.join(tempMQ_primary), ';'.join(tempCover_primary), ';'.join(tempDir_primary), \
-                        ';'.join(tempMQ_pair), ';'.join(tempCover_pair), ';'.join(tempDir_pair), \
-                         ';'.join(tempMQ_SA), ';'.join(tempCover_SA), ';'.join(tempDir_SA), ';'.join(tempPairPos), ';'.join(tempPrimaryPos)])
+    for key in sorted(cluster_junc):
+
+        # obtain the most frequent junction
+        junc_counter = collections.Counter(cluster_junc[key])
+        best_junc = junc_counter.most_common(1)[0][0]
+        btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq = best_junc.split('\t')
+
+        print >> hOUT, '\t'.join([btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq, \
+                            ';'.join(cluster_id[key]), ';'.join(cluster_MQ_primary[key]), ';'.join(cluser_cover_primary[key]), ';'.join(cluster_dir_primary[key]), \
+                            ';'.join(cluster_MQ_pair[key]), ';'.join(cluster_cover_pair[key]), ';'.join(cluster_dir_pair[key]), \
+                            ';'.join(cluster_MQ_SA[key]), ';'.join(cluster_cover_SA[key]), ';'.join(cluster_dir_SA[key]), \
+                            ';'.join(cluster_pair_pos[key]), ';'.join(cluster_primary_pos[key])])
+
 
     hOUT.close()
 
