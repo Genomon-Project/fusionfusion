@@ -10,6 +10,9 @@ import config
 # for mapsplice2
 ReFus_ms2 = re.compile('FUS_(\d+)_(\d+)\(([\-\+])([\-\+])\)')
 
+# for TopHat2
+ReFus_th2 = re.compile('XF:Z:(\d) ([^ \t\n\r\f\v,]+)\-([^ \t\n\r\f\v,]+) (\d+) ([\dMmNnIiDd]+[Mm])(\d+F)([\dMmNnIiDd]+[Mm])')
+
 # for STAR
 cigarSRe_right = re.compile('(\d+)S$')
 cigarSRe_left = re.compile('^(\d+)S')
@@ -44,6 +47,51 @@ def extractFusionReads_ms2(inputFilePath, outputFilePath):
     outBamFile.close()
 
     
+def extractFusionReads_th2(inputFilePath, outputFilePath):
+
+    inBamFile = pysam.AlignmentFile(inputFilePath, "r")
+
+    fusionReadID = {}
+    for read in inBamFile.fetch():
+
+        # get the flag information
+        flags = format(int(read.flag), "#014b")[:1:-1]
+
+        # skip if either of the read pair is unmapped
+        if flags[2] == "1" or flags[3] == "1": continue
+
+        # skip supplementary alignment
+        if flags[8] == "1" or flags[11] == "1": continue
+
+        # skip duplicated reads
+        if flags[10] == "1": continue
+
+        for item in read.tags:
+            if item[0] == "XF":
+                fusionReadID[read.qname] = 1
+
+
+    inBamFile.close()
+
+    inBamFile = pysam.AlignmentFile(inputFilePath, "r")
+    outBamFile = pysam.AlignmentFile(outputFilePath, "w", template = inBamFile)
+    for read in inBamFile.fetch():
+
+        # get the flag information
+        flags = format(int(read.flag), "#014b")[:1:-1]
+
+        # skip supplementary alignment
+        if flags[8] == "1" or flags[11] == "1": continue
+
+
+        if read.qname in fusionReadID:
+            outBamFile.write(read)
+
+
+    inBamFile.close()
+    outBamFile.close()
+
+
 
 def getFusInfo_ms2(tempID, tempLine, fusInfo):
 
@@ -113,6 +161,79 @@ def getFusInfo_ms2(tempID, tempLine, fusInfo):
 
 
 
+def getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag):
+
+    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
+
+    # check the fusion validity
+    ufusInfo = list(set(fusInfo))
+    for fus in ufusInfo:
+        if fus == '*': continue
+
+        chr_primary, pos_primary, dir_primary, chr_pair, pos_pair, dir_pair, chr_chimera, pos_chimera, dir_chimera = "*", "*", "*", "*", "*", "*", "*", "*", "*"
+        mq_primary, cover_primary, mq_pair, cover_pair, mq_chimera, cover_chimera = "*", "*", "*", "*", "*", "*"
+
+        for i in range(0, len(tempLine)):
+
+            FF = tempLine[i].split('\t')
+            flags = format(int(FF[1]), "#014b")[:1:-1]
+            if fusInfo[i] == fus:
+                if str(SAFlag[i]) == "1":
+                    if chr_primary == '*':
+                        chr_primary = FF[2]
+                        pos_primary = FF[3]
+                        dir_primary = ("+" if flags[4] != "1" else "-")
+                        mq_primary = FF[4]
+                        cover_primary = cigar_utils.getCoverRegion(FF[2], FF[3], FF[5])
+                    else:
+                        chr_pair = FF[2]
+                        pos_pair = FF[3]
+                        dir_pair = ("+" if flags[4] != "1" else "-")
+                        mq_pair = FF[4]
+                        cover_pair = cigar_utils.getCoverRegion(FF[2], FF[3], FF[5])
+                else:
+                    chr_chimera = FF[2]
+                    pos_chimera = FF[3]
+                    dir_chimera = ("+" if flags[4] != "1" else "-")
+                    mq_chimera = FF[4]
+                    cover_chimera = cigar_utils.getCoverRegion(FF[2], FF[3], FF[5])
+            else:
+                chr_pair = FF[2]
+                pos_pair = FF[3]
+                dir_pair = ("+" if flags[4] != "1" else "-")
+                mq_pair = FF[4]
+                cover_pair = cigar_utils.getCoverRegion(FF[2], FF[3], FF[5])
+
+
+        if chr_primary == "*": continue
+        fusSplit = fus.split(',')
+        cigar_primary = fusSplit[3]
+        cigar_chimera = fusSplit[5] 
+        
+        breakDir_primary = ("-" if cigar_primary.islower() else "+")
+        breakDir_chimera = ("+" if cigar_chimera.islower() else "-")
+        breakPos_primary = str(pos_primary if cigar_primary.islower() else cigar_utils.getEndPos(pos_primary, cigar_primary.upper()))
+        breakPos_chimera = str(pos_chimera if cigar_chimera.islower() else cigar_utils.getEndPos(pos_chimera, cigar_chimera.upper()))
+
+        pairPos = 0
+        if pos_pair != "*":
+            if breakDir_primary == "+" and dir_pair == "+" and int(breakPos_primary) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_primary): pairPos = 1
+            if breakDir_primary == "-" and dir_pair == "-" and int(breakPos_primary) <= int(pos_pair) <= int(breakPos_primary) + abnormal_insert_size: pairPos = 1
+            if breakDir_chimera == "+" and dir_pair == "+" and int(breakPos_chimera) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_chimera): pairPos = 2
+            if breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + abnormal_insert_size: pairPos = 2
+
+        if pairPos == 0: continue
+
+        if chr_primary < chr_chimera or chr_primary == chr_chimera and breakPos_primary <= breakPos_chimera:
+            return '\t'.join([chr_primary, breakPos_primary, breakDir_primary, chr_chimera, breakPos_chimera, breakDir_chimera, "---", tempID, \
+                             mq_primary, cover_primary, dir_primary, mq_pair, cover_pair, dir_pair, \
+                             mq_chimera, cover_chimera, dir_chimera, str(pairPos), "1"] )
+        else:
+            return '\t'.join([chr_chimera, breakPos_chimera, breakDir_chimera, chr_primary, breakPos_primary, breakDir_primary, "---", tempID, \
+                             mq_primary, cover_primary, dir_primary, mq_pair, cover_pair, dir_pair, \
+                             mq_chimera, cover_chimera, dir_chimera, str(pairPos), "2"] )
+
+
 def parseJuncInfo_ms2(inputFilePath, outputFilePath):
 
     """
@@ -160,9 +281,58 @@ def parseJuncInfo_ms2(inputFilePath, outputFilePath):
         if tempFusInfo is not None:
             print >> hOUT, tempFusInfo
 
-
     hOUT.close()
 
+
+def parseJuncInfo_th2(inputFilePath, outputFilePath):
+
+    """
+    script for collecting short reads supporting fusion candidates in TopHat2 sam file
+    """
+
+    hIN = open(inputFilePath, 'r')
+    hOUT = open(outputFilePath, 'w')
+
+    tempID = ""
+    fusInfo = []
+    SAFlag = []
+    tempLine = []
+
+    for line in hIN:
+        if line[0] == "@": continue
+        line = line.rstrip('\n')
+        F = line.split('\t')
+
+        if tempID != F[0]:
+            if fusInfo.count('*') != len(tempLine):
+                tempFusInfo = getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag)
+                if tempFusInfo is not None:
+                    print >> hOUT, tempFusInfo
+
+            tempID = F[0]
+            fusInfo = []
+            SAFlag = []
+            tempLine = []
+
+        tempLine.append(line)
+        mFus = ReFus_th2.search('\t'.join(F[11:]))
+        if mFus is not None:
+            fusInfo.append(','.join([mFus.group(2), mFus.group(3), mFus.group(4), mFus.group(5), mFus.group(6), mFus.group(7)]))
+            SAFlag.append(mFus.group(1))
+        else:
+            fusInfo.append('*')
+            SAFlag.append('*')
+
+    hIN.close()
+
+
+    if fusInfo.count('*') != len(tempLine):
+        tempFusInfo = getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag)
+        if tempFusInfo is not None:
+            print >> hOUT, tempFusInfo
+
+
+    hOUT.close()
 
 
 def getFusInfo_STAR(juncLine):

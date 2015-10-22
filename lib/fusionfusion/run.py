@@ -65,6 +65,7 @@ def main(args):
 
     starBamFile = args.star
     ms2BamFile = args.ms2
+    th2BamFile = args.th2
     output_dir = args.out
 
     config.param_conf.read(args.param)
@@ -108,6 +109,29 @@ def main(args):
         hOUT.close()
 
         cluster_filter_junction(output_dir + "/ms2.chimeric.txt", output_dir + "/ms2")
+
+        if debug_mode == False:
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.sam"])
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.sam"])
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.txt"])
+            subprocess.call(["rm", output_dir + "/ms2.chimeric.txt"])
+
+
+    if th2BamFile is not None:
+
+        parseJunctionInfo.extractFusionReads_th2(th2BamFile, output_dir + "/th2.chimeric.tmp.sam")
+
+        hOUT = open(output_dir + "/th2.chimeric.sam", "w")
+        subprocess.call(["sort", "-k1", output_dir + "/th2.chimeric.tmp.sam"], stdout = hOUT)
+        hOUT.close()
+
+        parseJunctionInfo.parseJuncInfo_th2(output_dir + "/th2.chimeric.sam", output_dir + "/th2.chimeric.tmp.txt")
+
+        hOUT = open(output_dir + "/th2.chimeric.txt", "w")
+        subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/th2.chimeric.tmp.txt"], stdout = hOUT)
+        hOUT.close()
+
+        cluster_filter_junction(output_dir + "/th2.chimeric.txt", output_dir + "/th2")
 
         if debug_mode == False:
             subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.sam"])
