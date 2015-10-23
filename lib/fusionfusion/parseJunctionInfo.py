@@ -176,6 +176,9 @@ def getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag):
         for i in range(0, len(tempLine)):
 
             FF = tempLine[i].split('\t')
+            if FF[0] == "HWI-ST1165:73:AD0JHGACXX:7:1102:18080:166569":
+                pass
+
             flags = format(int(FF[1]), "#014b")[:1:-1]
             if fusInfo[i] == fus:
                 if str(SAFlag[i]) == "1":
@@ -217,12 +220,10 @@ def getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag):
 
         pairPos = 0
         if pos_pair != "*":
-            if chr_primary == chr_pair:
-                if breakDir_primary == "+" and dir_pair == "+" and int(breakPos_primary) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_primary): pairPos = 1
-                if breakDir_primary == "-" and dir_pair == "-" and int(breakPos_primary) <= int(pos_pair) <= int(breakPos_primary) + abnormal_insert_size: pairPos = 1
-            elif chr_chimera == chr_pair:
-                if breakDir_chimera == "+" and dir_pair == "+" and int(breakPos_chimera) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_chimera): pairPos = 2
-                if breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + abnormal_insert_size: pairPos = 2
+            if chr_primary == chr_pair and breakDir_primary == "+" and dir_pair == "+" and int(breakPos_primary) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_primary): pairPos = 1
+            if chr_primary == chr_pair and breakDir_primary == "-" and dir_pair == "-" and int(breakPos_primary) <= int(pos_pair) <= int(breakPos_primary) + abnormal_insert_size: pairPos = 1
+            if chr_chimera == chr_pair and breakDir_chimera == "+" and dir_pair == "+" and int(breakPos_chimera) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_chimera): pairPos = 2
+            if chr_chimera == chr_pair and breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + abnormal_insert_size: pairPos = 2
 
         if pairPos == 0: continue
 
