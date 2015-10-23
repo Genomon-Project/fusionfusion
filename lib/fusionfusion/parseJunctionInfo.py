@@ -213,14 +213,16 @@ def getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag):
         breakDir_primary = ("-" if cigar_primary.islower() else "+")
         breakDir_chimera = ("+" if cigar_chimera.islower() else "-")
         breakPos_primary = str(pos_primary if cigar_primary.islower() else cigar_utils.getEndPos(pos_primary, cigar_primary.upper()))
-        breakPos_chimera = str(pos_chimera if cigar_chimera.islower() else cigar_utils.getEndPos(pos_chimera, cigar_chimera.upper()))
+        breakPos_chimera = str(cigar_utils.getEndPos(pos_chimera, cigar_chimera.upper()) if cigar_chimera.islower() else pos_chimera)
 
         pairPos = 0
         if pos_pair != "*":
-            if breakDir_primary == "+" and dir_pair == "+" and int(breakPos_primary) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_primary): pairPos = 1
-            if breakDir_primary == "-" and dir_pair == "-" and int(breakPos_primary) <= int(pos_pair) <= int(breakPos_primary) + abnormal_insert_size: pairPos = 1
-            if breakDir_chimera == "+" and dir_pair == "+" and int(breakPos_chimera) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_chimera): pairPos = 2
-            if breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + abnormal_insert_size: pairPos = 2
+            if chr_primary == chr_pair:
+                if breakDir_primary == "+" and dir_pair == "+" and int(breakPos_primary) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_primary): pairPos = 1
+                if breakDir_primary == "-" and dir_pair == "-" and int(breakPos_primary) <= int(pos_pair) <= int(breakPos_primary) + abnormal_insert_size: pairPos = 1
+            elif chr_chimera == chr_pair:
+                if breakDir_chimera == "+" and dir_pair == "+" and int(breakPos_chimera) - abnormal_insert_size <= int(pos_pair) <= int(breakPos_chimera): pairPos = 2
+                if breakDir_chimera == "-" and dir_pair == "-" and int(breakPos_chimera) <= int(pos_pair) <= int(breakPos_chimera) + abnormal_insert_size: pairPos = 2
 
         if pairPos == 0: continue
 

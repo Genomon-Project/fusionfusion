@@ -488,6 +488,7 @@ def checkMatching(inputFilePath, outputFilePath):
             targetScore= 0
             site2Match = {}
             crossMatch = 0
+            targetSize = "---"
 
         site2Match[F[13] + ':' + str(int(F[15]) + 1) + '-' + F[16]] = int(F[0])
 
@@ -505,8 +506,6 @@ def checkMatching(inputFilePath, outputFilePath):
 
         if chr1 == F[13]:
             if (strand1 == "+" and F[8] == "-" and abs(pos1 - int(F[16])) < 5) or (strand1 == "-" and F[8] == "+" and abs(pos1 - 1 - int(F[15])) < 5):
-                if tempID == "chr17:-58342773-chr17:+58679979_contig2":
-                    pass
 
                 targetAln = F[13] + ':' + str(int(F[15]) + 1) + '-' + F[16] 
                 targetScore= int(F[0])
