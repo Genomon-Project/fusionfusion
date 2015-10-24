@@ -125,7 +125,7 @@ def main(args):
         subprocess.call(["sort", "-k1", output_dir + "/th2.chimeric.tmp.sam"], stdout = hOUT)
         hOUT.close()
         parseJunctionInfo.parseJuncInfo_th2(output_dir + "/th2.chimeric.sam", output_dir + "/th2.chimeric.tmp.txt")
-
+        
         hOUT = open(output_dir + "/th2.chimeric.txt", "w")
         subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/th2.chimeric.tmp.txt"], stdout = hOUT)
         hOUT.close()
