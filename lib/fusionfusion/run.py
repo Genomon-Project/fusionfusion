@@ -119,13 +119,11 @@ def main(args):
 
     if th2BamFile is not None:
 
-        """
         parseJunctionInfo.extractFusionReads_th2(th2BamFile, output_dir + "/th2.chimeric.tmp.sam")
 
         hOUT = open(output_dir + "/th2.chimeric.sam", "w")
         subprocess.call(["sort", "-k1", output_dir + "/th2.chimeric.tmp.sam"], stdout = hOUT)
         hOUT.close()
-        """
         parseJunctionInfo.parseJuncInfo_th2(output_dir + "/th2.chimeric.sam", output_dir + "/th2.chimeric.tmp.txt")
 
         hOUT = open(output_dir + "/th2.chimeric.txt", "w")

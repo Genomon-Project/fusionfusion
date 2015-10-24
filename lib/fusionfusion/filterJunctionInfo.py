@@ -26,16 +26,14 @@ def filterCoverRegion(inputFilePath, outputFilePath):
         if F[1] == "4489051":
             pass
 
-        # filter by the number of supporting read pairs
-        # IDs = F[7].split(';')
-        # uIDs = list(set(IDs))
-        # if len(uIDs) < min_read_pair_num: continue
         coveredRegion_primary = F[9].split(';')
         coveredRegion_pair = F[12].split(';')
         coveredRegion_SA = F[15].split(';')
         coveredRegion_meta = [coveredRegion_primary[i] + ';' + coveredRegion_pair[i] + ';' + coveredRegion_SA[i] for i in range(0, len(coveredRegion_primary))]
         uniqueCoverdRegion_meta = list(set(coveredRegion_meta))
         if len(uniqueCoverdRegion_meta) < min_read_pair_num: continue
+
+        # coverRegionSize_primary = utils.getCoverSize
 
         # filter by the ratio of valid read pairs
         pairPos = F[17].split(';')
