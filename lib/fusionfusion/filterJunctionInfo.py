@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import re
-import regions, seq_utils
+import regions, seq_utils, region_utils
 
 import config
 
@@ -14,7 +14,8 @@ def filterCoverRegion(inputFilePath, outputFilePath):
     min_valid_read_pair_ratio = config.param_conf.getfloat("filter_condition", "min_valid_read_pair_ratio")
     min_cover_size = config.param_conf.getint("filter_condition", "min_cover_size")
     min_chimeric_size = config.param_conf.getint("filter_condition", "min_chimeric_size")
-    
+    anchor_size_thres = config.param_conf.getint("filter_condition", "anchor_size_thres")
+
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
@@ -23,26 +24,27 @@ def filterCoverRegion(inputFilePath, outputFilePath):
 
         if F[0] == F[3] and abs(int(F[1]) - int(F[4])) < min_chimeric_size: continue
 
-        if F[1] == "4489051":
-            pass
-
         coveredRegion_primary = F[9].split(';')
         coveredRegion_pair = F[12].split(';')
         coveredRegion_SA = F[15].split(';')
+
+        # check the number of unique read pairs
         coveredRegion_meta = [coveredRegion_primary[i] + ';' + coveredRegion_pair[i] + ';' + coveredRegion_SA[i] for i in range(0, len(coveredRegion_primary))]
         uniqueCoverdRegion_meta = list(set(coveredRegion_meta))
         if len(uniqueCoverdRegion_meta) < min_read_pair_num: continue
 
-        # coverRegionSize_primary = utils.getCoverSize
+        # check the maximum anchor size
+        coverRegionSize_primary = map(region_utils.getCoverSize, coveredRegion_primary)
+        coverRegionSize_SA = map(region_utils.getCoverSize, coveredRegion_SA)
+        anchor_size = [min(coverRegionSize_primary[i], coverRegionSize_SA[i]) for i in range(len(coverRegionSize_primary))]
+        if max(anchor_size) < anchor_size_thres: continue
 
+            
         # filter by the ratio of valid read pairs
         pairPos = F[17].split(';')
         if float(pairPos.count("0")) / float(len(pairPos)) > 1 - min_valid_read_pair_ratio: continue
 
         # check for the covered region
-        coveredRegion_primary = F[9].split(';')
-        coveredRegion_pair = F[12].split(';')
-        coveredRegion_SA = F[15].split(';')
         pairPos = F[17].split(';')
         primaryPos = F[18].split(';')
 
