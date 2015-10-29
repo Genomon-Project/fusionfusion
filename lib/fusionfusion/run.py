@@ -138,10 +138,10 @@ def main(args):
         cluster_filter_junction(output_dir + "/th2.chimeric.txt", output_dir + "/th2")
 
         if debug_mode == False:
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.sam"])
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.sam"])
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.txt"])
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.txt"])
+            subprocess.call(["rm", output_dir + "/th2.chimeric.tmp.sam"])
+            subprocess.call(["rm", output_dir + "/th2.chimeric.sam"])
+            subprocess.call(["rm", output_dir + "/th2.chimeric.tmp.txt"])
+            subprocess.call(["rm", output_dir + "/th2.chimeric.txt"])
 
 
     annotationFunction.merge_fusion_result(output_dir, 
