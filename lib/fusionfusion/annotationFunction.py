@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import sys, pysam
+import sys, pysam, os
 
 import config
 junction_margin = 5
@@ -122,3 +122,51 @@ def filterAndAnnotation(inputFilePath, outputFilePath):
     hOUT.close()
 
 
+def merge_fusion_result(input_dir, output_file_path):
+
+    fus2count_ms2 = {}
+    fus2count_star = {}
+    fus2count_th2 = {}
+
+    label_ms2, label_star, label_th2 = 0, 0, 0
+
+    if os.path.exists(input_dir + "/ms2.fusion.result.txt"):
+        label_ms2 = 1
+        with open(input_dir + "/ms2.fusion.result.txt") as hIN:
+            for line in hIN:
+                F = line.rstrip('\n').split('\t')
+                key = '\t'.join(F[0:7] + F[8:12])
+                fus2count_ms2[key] = F[7]
+
+    if os.path.exists(input_dir + "/star.fusion.result.txt"): 
+        label_star = 1
+        with open(input_dir + "/star.fusion.result.txt") as hIN:
+            for line in hIN:
+                F = line.rstrip('\n').split('\t')
+                key = '\t'.join(F[0:7] + F[8:12])
+                fus2count_star[key] = F[7]
+
+    if os.path.exists(input_dir + "/th2.fusion.result.txt"):
+        label_th2 = 1 
+        with open(input_dir + "/th2.fusion.result.txt") as hIN:
+            for line in hIN:
+                F = line.rstrip('\n').split('\t')
+                key = '\t'.join(F[0:7] + F[8:12])
+                fus2count_th2[key] = F[7]
+
+    fus_keys = list(set(fus2count_star.keys() + fus2count_ms2.keys() + fus2count_th2.keys()))
+    hOUT = open(output_file_path, 'w')
+
+    for fus in fus_keys:
+        count_star = fus2count_star[fus] if fus in fus2count_star else "---"
+        count_ms2 = fus2count_ms2[fus] if fus in fus2count_ms2 else "---"
+        count_th2 = fus2count_th2[fus] if fus in fus2count_th2 else "---"
+
+        print_line = fus
+        if label_ms2 == 1: print_line = print_line + '\t' + count_ms2
+        if label_star == 1: print_line = print_line + '\t' + count_star
+        if label_th2 == 1: print_line = print_line + '\t' + count_th2
+
+        print >> hOUT, print_line
+
+    hOUT.close()

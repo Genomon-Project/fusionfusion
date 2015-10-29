@@ -68,6 +68,10 @@ def main(args):
     th2BamFile = args.th2
     output_dir = args.out
 
+    if starBamFile == None and ms2BamFile  == None and th2BamFile == None:
+        print >> sys.stderr, "At least one of --star, --ms2 or --th2 should be included"
+        sys.exit(1)
+ 
     config.param_conf.read(args.param)
 
     debug_mode = config.param_conf.getboolean("debug", "debug_mode")
@@ -76,6 +80,8 @@ def main(args):
     # make direcotry
     utils.make_directory(output_dir)
     ####################
+
+    """
 
     ####################
     # parsing chimeric reads from bam files
@@ -138,3 +144,9 @@ def main(args):
             subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.txt"])
             subprocess.call(["rm", output_dir + "/ms2.chimeric.txt"])
 
+    """
+
+    annotationFunction.merge_fusion_result(output_dir, 
+                                           output_dir + "/fusion_fusion.result.txt")
+
+    
