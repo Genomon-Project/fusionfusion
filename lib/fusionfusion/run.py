@@ -81,7 +81,6 @@ def main(args):
     utils.make_directory(output_dir)
     ####################
 
-    """
 
     ####################
     # parsing chimeric reads from bam files
@@ -144,7 +143,6 @@ def main(args):
             subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.txt"])
             subprocess.call(["rm", output_dir + "/ms2.chimeric.txt"])
 
-    """
 
     annotationFunction.merge_fusion_result(output_dir, 
                                            output_dir + "/fusion_fusion.result.txt")
