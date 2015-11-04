@@ -1,12 +1,15 @@
 #! /usr/bin/env bash
 
 # create corresponding table for GRCh name and UCSC name
+rm -rf GCF_000001405.13.assembly.txt
 wget ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/All/GCF_000001405.13.assembly.txt
 python make_ucsc_grch.py GCF_000001405.13.assembly.txt > grch2ucsc.txt
 
 # for GRCh38 (hg38)
 # ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/All/GCF_000001405.31.assembly.txt
 
+rm -rf refGene.txt.gz
+rm -rf ensGene.txt.gz
 wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz
 wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/ensGene.txt.gz
 

@@ -5,108 +5,146 @@ import sys, pysam, os
 import config
 junction_margin = 5
 
+
+def get_gene_info(chr, pos, ref_gene_tb, ens_gene_tb):
+
+    # check gene annotation for refGene 
+    tabixErrorFlag = 0
+    try:
+        records = ref_gene_tb.fetch(chr, int(pos) - 1, int(pos) + 1)
+    except Exception as inst:
+        # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+        tabixErrorFlag = 1
+        
+    gene = [];
+    if tabixErrorFlag == 0:
+        for record_line in records:
+            record = record_line.split('\t')
+            gene.append(record[3])
+
+    # if any gene cannot be found in refGene, then search ensGene
+    if len(gene) == 0:
+        tabixErrorFlag = 0
+        try:
+            records = ens_gene_tb.fetch(chr, int(pos) - 1, int(pos) + 1)
+        except Exception as inst:
+            # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+            tabixErrorFlag = 1
+            
+        # for ensGene, just the longest gene is shown
+        temp_length = 0
+        temp_gene = ""
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                if int(record[4]) > temp_length:
+                    temp_gene = record[3]
+
+            if temp_gene != "": gene.append(temp_gene)
+            
+    if len(gene) == 0: gene.append("---")
+
+    return list(set(gene))
+
+
+def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
+
+    # check exon annotation for refGene 
+    tabixErrorFlag = 0
+    try:
+        records = ref_exon_tb.fetch(chr, int(pos) - 1, int(pos) + 1)
+    except Exception as inst:
+        # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+        tabixErrorFlag = 1
+        
+    junction = []
+    if tabixErrorFlag == 0:
+        for record_line in records:
+            record = record_line.split('\t')
+            if abs(int(pos) - int(record[1])) < junction_margin:
+                if record[5] == "+": junction.append(record[3] + ".start")
+                if record[5] == "-": junction.append(record[3] + ".end")
+            if abs(int(pos) - int(record[2])) < junction_margin:
+                if record[5] == "+": junction.append(record[3] + ".end")
+                if record[5] == "-": junction.append(record[3] + ".start")
+
+    # if any exon-intron junction cannot be found in refGene, then search ensGene
+    if len(junction) == 0: 
+        tabixErrorFlag = 0
+        try:
+            records = ens_exon_tb.fetch(chr, int(pos) - 1, int(pos) + 1)
+        except Exception as inst:
+            # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+            tabixErrorFlag = 1
+             
+        # for ensGene, just the longest gene is shown
+        temp_length = 0
+        temp_junc = ""
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                if int(record[4]) > temp_length:
+                    if abs(int(pos) - int(record[1])) < junction_margin:
+                        if record[5] == "+": temp_junc = record[3] + ".start"
+                        if record[5] == "-": temp_junc = record[3] + ".end"
+                    if abs(int(pos) - int(record[2])) < junction_margin: 
+                        if record[5] == "+": temp_junc = record[3] + ".end"
+                        if record[5] == "-": temp_junc = record[3] + ".start"
+                
+            if temp_junc != "": junction.append(temp_junc)
+
+                
+    if len(junction) == 0: junction.append("---")
+    
+    return list(set(junction))
+
+
+
 def filterAndAnnotation(inputFilePath, outputFilePath):
 
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
-    gene_bed = config.param_conf.get("annotation", "gene_bed")
-    exon_bed = config.param_conf.get("annotation", "exon_bed")
+    annotation_dir = config.param_conf.get("annotation", "annotation_dir")
+    ref_gene_bed = annotation_dir + "/refGene.bed.gz"
+    ref_exon_bed = annotation_dir + "/refExon.bed.gz"
+    ens_gene_bed = annotation_dir + "/ensGene.bed.gz"
+    ens_exon_bed = annotation_dir + "/ensExon.bed.gz"
+    grch2ucsc_file = annotation_dir + "/grch2ucsc.txt"
+
+    # relationship between CRCh and UCSC chromosome names
+    grch2ucsc = {}
+    with open(grch2ucsc_file, 'r') as hin:
+        for line in hin:
+            F = line.rstrip('\n').split('\t')
+            grch2ucsc[F[0]] = F[1]
+
     filter_same_gene = config.param_conf.getboolean("filter_condition", "filter_same_gene")
 
-    gene_tb = pysam.TabixFile(gene_bed)
-    exon_tb = pysam.TabixFile(exon_bed)
+    ref_gene_tb = pysam.TabixFile(ref_gene_bed)
+    ref_exon_tb = pysam.TabixFile(ref_exon_bed)
+    ens_gene_tb = pysam.TabixFile(ens_gene_bed)
+    ens_exon_tb = pysam.TabixFile(ens_exon_bed)
 
     for line in hIN:
 
         F = line.rstrip('\n').split('\t')
-     
-        ##########
-        # check gene annotation for the side 1  
-        tabixErrorFlag = 0
-        try:
-            records = gene_tb.fetch(F[0], int(F[1]) - 1, int(F[1]) + 1)
-        except Exception as inst:
-            print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
-            tabixErrorFlag = 1
-
-        gene1 = [];
-        if tabixErrorFlag == 0:
-            for record_line in records:
-                record = record_line.split('\t')
-                gene1.append(record[3])
-
-        if len(gene1) == 0: gene1.append("---")
-        gene1 = list(set(gene1))
-        ##########
-
-        ##########
-        # check exon-intron junction annotation for the side 1  
-        tabixErrorFlag = 0
-        try:
-            records = exon_tb.fetch(F[0], int(F[1]) - junction_margin, int(F[1]) + junction_margin)
-        except Exception as inst:
-            print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
-            tabixErrorFlag = 1
+    
+        # check gene annotation for the side 1
+        chr_name = grch2ucsc[F[0]] if F[0] in grch2ucsc else F[0] 
+        gene1 = get_gene_info(chr_name, F[1], ref_gene_tb, ens_gene_tb)
         
-        junction1 = [] 
-        if tabixErrorFlag == 0:
-            for record_line in records:
-                record = record_line.split('\t')
-                if abs(int(F[1]) - int(record[1])) < junction_margin:
-                    if record[5] == "+": junction1.append(record[3] + ".start")
-                    if record[5] == "-": junction1.append(record[3] + ".end")
-                if abs(int(F[1]) - int(record[2])) < junction_margin:
-                    if record[5] == "+": junction1.append(record[3] + ".end")
-                    if record[5] == "-": junction1.append(record[3] + ".start") 
-
-        if len(junction1) == 0: junction1.append("---")
-        junction1 = list(set(junction1))
-        ##########
-
-        ##########
         # check gene annotation for the side 2
-        tabixErrorFlag = 0
-        try:
-            records = gene_tb.fetch(F[3], int(F[4]) - 1, int(F[4]) + 1) 
-        except Exception as inst:
-            print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
-            tabixErrorFlag = 1
+        chr_name = grch2ucsc[F[3]] if F[3] in grch2ucsc else F[3]
+        gene2 = get_gene_info(chr_name, F[4], ref_gene_tb, ens_gene_tb)
 
-        gene2 = [];
-        if tabixErrorFlag == 0:
-            for record_line in records:
-                record = record_line.split('\t')
-                gene2.append(record[3])
+        # check exon-intron junction annotation for the side 1 
+        chr_name = grch2ucsc[F[0]] if F[0] in grch2ucsc else F[0]
+        junction1 = get_junc_info(chr_name, F[1], ref_exon_tb, ens_exon_tb, junction_margin) 
 
-        if len(gene2) == 0: gene2.append("---")
-        gene2 = list(set(gene2))
-        ##########
-
-        ##########
-        # check exon-intron junction annotation for the side 2  
-        tabixErrorFlag = 0
-        try:
-            records = exon_tb.fetch(F[3], int(F[4]) - junction_margin, int(F[4]) + junction_margin)
-        except Exception as inst:
-            print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
-            tabixErrorFlag = 1
-
-        junction2 = []
-        if tabixErrorFlag == 0:
-            for record_line in records:
-                record = record_line.split('\t')
-                if abs(int(F[4]) - int(record[1])) < junction_margin:
-                    if record[5] == "+": junction2.append(record[3] + ".start")
-                    if record[5] == "-": junction2.append(record[3] + ".end")
-                if abs(int(F[4]) - int(record[2])) < junction_margin:
-                    if record[5] == "+": junction2.append(record[3] + ".end")
-                    if record[5] == "-": junction2.append(record[3] + ".start")
-
-        if len(junction2) == 0: junction2.append("---")
-        junction2 = list(set(junction2))
-        ##########
-
+        # check exon-intron junction annotation for the side 2 
+        chr_name = grch2ucsc[F[3]] if F[3] in grch2ucsc else F[3]
+        junction2 = get_junc_info(chr_name, F[4], ref_exon_tb, ens_exon_tb, junction_margin)
 
         sameGeneFlag = 0
         for g1 in gene1:

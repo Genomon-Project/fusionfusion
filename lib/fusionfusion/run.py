@@ -9,7 +9,7 @@ import utils
 import config
 
 def cluster_filter_junction(inputFilePath, outputFilePrefix):
-    
+
     debug_mode = config.param_conf.getboolean("debug", "debug_mode")
 
     parseJunctionInfo.clusterJuncInfo(inputFilePath,
@@ -100,13 +100,13 @@ def main(args):
 
 
     if ms2BamFile is not None:
-   
+
         parseJunctionInfo.extractFusionReads_ms2(ms2BamFile, output_dir + "/ms2.chimeric.tmp.sam")
 
         hOUT = open(output_dir + "/ms2.chimeric.sam", "w")
         subprocess.call(["sort", "-k1", output_dir + "/ms2.chimeric.tmp.sam"], stdout = hOUT)
         hOUT.close()
-
+    
         parseJunctionInfo.parseJuncInfo_ms2(output_dir + "/ms2.chimeric.sam", output_dir + "/ms2.chimeric.tmp.txt") 
 
         hOUT = open(output_dir + "/ms2.chimeric.txt", "w")
