@@ -52,7 +52,7 @@ def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
     # check exon annotation for refGene 
     tabixErrorFlag = 0
     try:
-        records = ref_exon_tb.fetch(chr, int(pos) - 1, int(pos) + 1)
+        records = ref_exon_tb.fetch(chr, int(pos) - junction_margin, int(pos) + junction_margin)
     except Exception as inst:
         # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
         tabixErrorFlag = 1
@@ -72,7 +72,7 @@ def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
     if len(junction) == 0: 
         tabixErrorFlag = 0
         try:
-            records = ens_exon_tb.fetch(chr, int(pos) - 1, int(pos) + 1)
+            records = ens_exon_tb.fetch(chr, int(pos) - junction_margin, int(pos) + junction_margin)
         except Exception as inst:
             # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
             tabixErrorFlag = 1
