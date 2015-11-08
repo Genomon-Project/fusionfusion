@@ -19,12 +19,24 @@ blat
 
 ## Install
 
+First, download the latest release from the release section or type the following command
+```
+wget https://github.com/Genomon-Project/fusionfusion/archive/v0.1.0.tar.gz
+tar zxvf v0.1.0.tar.gz
+```
+
+Alternatively, you can download the latest developing version (which may be unstable)
 ```
 git clone https://github.com/Genomon-Project/fusionfusion.git
-cd fusionfusion 
+```
+
+Then, install the package by standard python package protocol (https://docs.python.org/2/install/)
+```
+cd fusionfusion-0.1.0
 python setup.py build
 python setup.py install
 ```
+
 For the last command, you may need to add --user if you are using a shared computing cluster.
 ```
 python setup.py install --user
