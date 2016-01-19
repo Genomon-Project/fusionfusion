@@ -8,6 +8,10 @@ python make_ucsc_grch.py GCF_000001405.13.assembly.txt > grch2ucsc.txt
 # for GRCh38 (hg38)
 # ftp://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/All/GCF_000001405.31.assembly.txt
 
+# for GRCm38 (mm10)
+# wget http://hgdownload.soe.ucsc.edu/goldenPath/mm10/database/refGene.txt.gz
+# wget http://hgdownload.soe.ucsc.edu/goldenPath/mm10/database/ensGene.txt.gz
+
 rm -rf refGene.txt.gz
 rm -rf ensGene.txt.gz
 wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/database/refGene.txt.gz
