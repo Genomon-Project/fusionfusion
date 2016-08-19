@@ -5,7 +5,8 @@ import re
 import cigar_utils
 import pysam
 import collections
-import config
+# import config
+from config import *
 
 # for mapsplice2
 ReFus_ms2 = re.compile('FUS_(\d+)_(\d+)\(([\-\+])([\-\+])\)')
@@ -95,7 +96,8 @@ def extractFusionReads_th2(inputFilePath, outputFilePath):
 
 def getFusInfo_ms2(tempID, tempLine, fusInfo):
 
-    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
+    # abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
+    abnormal_insert_size = param_conf.abnormal_insert_size
 
     # check the fusion validity
     ufusInfo = list(set(fusInfo))
@@ -163,7 +165,8 @@ def getFusInfo_ms2(tempID, tempLine, fusInfo):
 
 def getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag):
 
-    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
+    # abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
+    abnormal_insert_size = param_conf.abnormal_insert_size
 
     # check the fusion validity
     ufusInfo = list(set(fusInfo))
@@ -340,8 +343,10 @@ def parseJuncInfo_th2(inputFilePath, outputFilePath):
 
 def getFusInfo_STAR(juncLine):
 
-    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
-    min_major_clip_size = config.param_conf.getint("parse_condition", "min_major_clip_size")
+    # abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
+    # min_major_clip_size = config.param_conf.getint("parse_condition", "min_major_clip_size")
+    abnormal_insert_size = param_conf.abnormal_insert_size
+    min_major_clip_size = param_conf.min_major_clipping_size
  
     """
     function for organizing and print junction information
@@ -569,8 +574,7 @@ def getFusInfo_STAR(juncLine):
 
 def parseJuncInfo_STAR(inputFilePath, outputFilePath):
 
-    abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
- 
+     
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 

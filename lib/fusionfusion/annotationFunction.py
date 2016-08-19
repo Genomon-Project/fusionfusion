@@ -2,7 +2,9 @@
 
 import sys, pysam, os
 
-import config
+# import config
+from config import *
+
 junction_margin = 5
 
 
@@ -105,7 +107,11 @@ def filterAndAnnotation(inputFilePath, outputFilePath):
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
-    annotation_dir = config.param_conf.get("annotation", "annotation_dir")
+    # annotation_dir = config.param_conf.get("annotation", "annotation_dir")
+    # filter_same_gene = config.param_conf.getboolean("filter_condition", "filter_same_gene")
+    annotation_dir = param_conf.resource_dir
+    filter_same_gene = param_conf.filter_same_gene
+
     ref_gene_bed = annotation_dir + "/refGene.bed.gz"
     ref_exon_bed = annotation_dir + "/refExon.bed.gz"
     ens_gene_bed = annotation_dir + "/ensGene.bed.gz"
@@ -118,8 +124,6 @@ def filterAndAnnotation(inputFilePath, outputFilePath):
         for line in hin:
             F = line.rstrip('\n').split('\t')
             grch2ucsc[F[0]] = F[1]
-
-    filter_same_gene = config.param_conf.getboolean("filter_condition", "filter_same_gene")
 
     ref_gene_tb = pysam.TabixFile(ref_gene_bed)
     ref_exon_tb = pysam.TabixFile(ref_exon_bed)
