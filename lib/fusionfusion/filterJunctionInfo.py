@@ -2,6 +2,7 @@
 
 import re
 import regions, seq_utils, region_utils
+import pysam
 
 # import config
 from config import *
@@ -91,6 +92,41 @@ def filterCoverRegion(inputFilePath, outputFilePath):
 
     hIN.close()
     hOUT.close()
+
+
+
+def filterPoolControl(input_file, output_file, control_file):
+
+    control_db = pysam.TabixFile(control_file)
+
+    hout = open(output_file, 'w') 
+
+    with open(input_file, 'r') as hin:
+        for line in hin:
+            F = line.rstrip('\n').split('\t')
+ 
+            # skip if the junction is included in the control file
+            tabixErrorFlag = 0
+            if control_file is not None:
+                try:
+                    records = control_db.fetch(F[0], int(F[1]) - 5, int(F[1]) + 5)
+                except Exception as inst:
+                    # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+                    # tabixErrorMsg = str(inst.args)
+                    tabixErrorFlag = 1
+
+            control_flag = 0;
+            if tabixErrorFlag == 0:
+                 for record_line in records:
+                    record = record_line.split('\t')
+                    if F[0] == record[0] and F[1] == record[1] and F[2] == record[2] and \
+                       F[3] == record[3] and F[4] == record[4] and F[5] == record[5]:
+                        control_flag = 1
+
+            if control_flag == 0:
+                print >> hout, '\t'.join(F)
+
+    hout.close()
 
 
 def extractSplicingPattern(inputFilePath, outputFilePath):

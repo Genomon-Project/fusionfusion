@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import sys, os, argparse, subprocess
+import sys, os, argparse, subprocess, shutil
 import parseJunctionInfo
 import filterJunctionInfo
 import annotationFunction
@@ -19,8 +19,16 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
 
     filterJunctionInfo.filterCoverRegion(outputFilePrefix + ".chimeric.clustered.txt",
                                          outputFilePrefix + ".chimeric.clustered.filt1.txt")
-    
-    filterJunctionInfo.extractSplicingPattern(outputFilePrefix + ".chimeric.clustered.filt1.txt", 
+
+    if args.pooled_control_file is not None:
+        filterJunctionInfo.filterPoolControl(outputFilePrefix + ".chimeric.clustered.filt1.txt",
+                                             outputFilePrefix + ".chimeric.clustered.filt2.txt",
+                                             args.pooled_control_file)
+    else:
+        shutil.copyfile(outputFilePrefix + ".chimeric.clustered.filt1.txt",
+                         outputFilePrefix + ".chimeric.clustered.filt2.txt")
+
+    filterJunctionInfo.extractSplicingPattern(outputFilePrefix + ".chimeric.clustered.filt2.txt", 
                                               outputFilePrefix + ".chimeric.clustered.splicing.txt")
 
     ############
@@ -49,10 +57,10 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
                                      outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt")
 
     filterJunctionInfo.filterContigCheck(outputFilePrefix + ".chimeric.clustered.splicing.txt",
-                                         outputFilePrefix + ".chimeric.clustered.filt2.txt",
+                                         outputFilePrefix + ".chimeric.clustered.filt3.txt",
                                          outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt")
 
-    annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt2.txt",
+    annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt3.txt",
                                            outputFilePrefix + ".fusion.result.txt")
 
     # delete intermediate files
@@ -60,6 +68,7 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
         subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.txt"])
         subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt1.txt"])
         subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt2.txt"])
+        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt3.txt"])
         subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.txt"])
         subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.fa"])
         subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.psl"])

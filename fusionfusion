@@ -25,6 +25,9 @@ parser.add_argument("--reference_genome", metavar = "reference.fa", default = No
 parser.add_argument("--resource_dir", metavar = "resource_dir", type = str, required=True,
                     help = "annotation information directory")
 
+parser.add_argument("--pooled_control_file", default = None, type = str,
+                    help = "the path to control data created by merge_control (default: %(default)s)")
+
 parser.add_argument("--debug", default = False, action = 'store_true', help = "keep intermediate files")
 
 
