@@ -81,10 +81,26 @@ For other parameters, the default setting will work fine for 100bp-length paired
 ## Commands
 
 ```
-fusionfusion --star star.Chimeric.out.sam --ms2 ms2.bam --th2 th2.bam --out output_dir --param param.cfg
+fusionfusion [-h] [--version] [--star star.Chimeric.out.sam]
+                  [--ms2 ms2.bam] [--th2 th2.bam] 
+                  --out output_dir
+                  --reference_genome reference.fa 
+                  --resource_dir resource_dir 
+                  [--pooled_control_file POOLED_CONTROL_FILE]
+                  [--debug] [--abnormal_insert_size ABNORMAL_INSERT_SIZE]
+                  [--min_major_clipping_size MIN_MAJOR_CLIPPING_SIZE]
+                  [--min_read_pair_num MIN_READ_PAIR_NUM]
+                  [--min_valid_read_pair_ratio MIN_VALID_READ_PAIR_RATIO]
+                  [--min_cover_size MIN_COVER_SIZE]
+                  [--anchor_size_thres ANCHOR_SIZE_THRES]
+                  [--min_chimeric_size MIN_CHIMERIC_SIZE]
+                  [--min_allowed_contig_match_diff MIN_ALLOWED_CONTIG_MATCH_DIFF]
+                  [--check_contig_size_other_breakpoint CHECK_CONTIG_SIZE_OTHER_BREAKPOINT]
+                  [--filter_same_gene]
 ```
 At least one of --star, --ms2, --th2 arguments should be specified.
-The other arguments are mandatory.
+The arguments of --out, resource_dir, resource_dir are mandatory.
+For other arguments, please type `fusionfusion -h`.
 
 ## Results
 
