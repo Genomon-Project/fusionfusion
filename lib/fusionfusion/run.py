@@ -59,9 +59,9 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
     filterJunctionInfo.filterContigCheck(outputFilePrefix + ".chimeric.clustered.splicing.txt",
                                          outputFilePrefix + ".chimeric.clustered.filt3.txt",
                                          outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt")
-
+    
     annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt3.txt",
-                                           outputFilePrefix + ".fusion.result.txt")
+                                           outputFilePrefix + ".fusion.result.txt", args.genome_id, args.grc)
 
     # delete intermediate files
     if debug_mode == False:
@@ -92,7 +92,7 @@ def main(args):
     ##########
     # set parameters
     param_conf.reference_genome = args.reference_genome
-    param_conf.resource_dir = args.resource_dir
+    # param_conf.resource_dir = args.resource_dir
     param_conf.debug = args.debug
     param_conf.abnormal_insert_size = args.abnormal_insert_size
     param_conf.min_major_clipping_size = args.min_major_clipping_size

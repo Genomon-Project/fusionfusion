@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
-import sys, pysam, os
+import sys, pysam, os, subprocess
+import annot_utils.gene
+import annot_utils.exon
 
 # import config
 from config import *
@@ -32,7 +34,8 @@ def get_gene_info(chr, pos, ref_gene_tb, ens_gene_tb):
         except Exception as inst:
             # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
             tabixErrorFlag = 1
-            
+           
+        """ 
         # for ensGene, just the longest gene is shown
         temp_length = 0
         temp_gene = ""
@@ -40,10 +43,17 @@ def get_gene_info(chr, pos, ref_gene_tb, ens_gene_tb):
             for record_line in records:
                 record = record_line.split('\t')
                 if int(record[4]) > temp_length:
-                    temp_gene = record[3]
-
+                     temp_gene = record[3]
+    
             if temp_gene != "": gene.append(temp_gene)
-            
+        """
+
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                gene.append(record[3])
+
+ 
     if len(gene) == 0: gene.append("---")
 
     return list(set(gene))
@@ -78,14 +88,16 @@ def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
         except Exception as inst:
             # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
             tabixErrorFlag = 1
-             
+
+        """             
         # for ensGene, just the longest gene is shown
         temp_length = 0
         temp_junc = ""
         if tabixErrorFlag == 0:
             for record_line in records:
                 record = record_line.split('\t')
-                if int(record[4]) > temp_length:
+                # if int(record[4]) > temp_length:
+                if True:
                     if abs(int(pos) - int(record[1])) < junction_margin:
                         if record[5] == "+": temp_junc = record[3] + ".start"
                         if record[5] == "-": temp_junc = record[3] + ".end"
@@ -94,7 +106,18 @@ def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
                         if record[5] == "-": temp_junc = record[3] + ".start"
                 
             if temp_junc != "": junction.append(temp_junc)
+        """
 
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                if abs(int(pos) - int(record[1])) < junction_margin:
+                    if record[5] == "+": junction.append(record[3] + ".start")
+                    if record[5] == "-": junction.append(record[3] + ".end")
+                if abs(int(pos) - int(record[2])) < junction_margin: 
+                    if record[5] == "+": junction.append(record[3] + ".end")
+                    if record[5] == "-": junction.append(record[3] + ".start")
+    
                 
     if len(junction) == 0: junction.append("---")
     
@@ -102,17 +125,19 @@ def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
 
 
 
-def filterAndAnnotation(inputFilePath, outputFilePath):
+def filterAndAnnotation(inputFilePath, outputFilePath, genome_id, is_grc):
 
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
 
     # annotation_dir = config.param_conf.get("annotation", "annotation_dir")
     # filter_same_gene = config.param_conf.getboolean("filter_condition", "filter_same_gene")
-    annotation_dir = param_conf.resource_dir
+    # annotation_dir = param_conf.resource_dir
     filter_same_gene = param_conf.filter_same_gene
 
-    ref_gene_bed = annotation_dir + "/refGene.bed.gz"
+    """
+    # old procedure
+    # ref_gene_bed = annotation_dir + "/refGene.bed.gz"
     ref_exon_bed = annotation_dir + "/refExon.bed.gz"
     ens_gene_bed = annotation_dir + "/ensGene.bed.gz"
     ens_exon_bed = annotation_dir + "/ensExon.bed.gz"
@@ -129,26 +154,33 @@ def filterAndAnnotation(inputFilePath, outputFilePath):
     ref_exon_tb = pysam.TabixFile(ref_exon_bed)
     ens_gene_tb = pysam.TabixFile(ens_gene_bed)
     ens_exon_tb = pysam.TabixFile(ens_exon_bed)
+    """
+
+    annot_utils.gene.make_gene_info(outputFilePath + ".tmp.refGene.bed.gz", "refseq", genome_id, is_grc, False) 
+    annot_utils.gene.make_gene_info(outputFilePath + ".tmp.ensGene.bed.gz", "gencode", genome_id, is_grc, False)
+    annot_utils.exon.make_exon_info(outputFilePath + ".tmp.refExon.bed.gz", "refseq", genome_id, is_grc, False)
+    annot_utils.exon.make_exon_info(outputFilePath + ".tmp.ensExon.bed.gz", "gencode", genome_id, is_grc, False)
+ 
+    ref_gene_tb = pysam.TabixFile(outputFilePath + ".tmp.refGene.bed.gz")
+    ens_gene_tb = pysam.TabixFile(outputFilePath + ".tmp.ensGene.bed.gz")
+    ref_exon_tb = pysam.TabixFile(outputFilePath + ".tmp.refExon.bed.gz")
+    ens_exon_tb = pysam.TabixFile(outputFilePath + ".tmp.ensExon.bed.gz")
 
     for line in hIN:
 
         F = line.rstrip('\n').split('\t')
     
         # check gene annotation for the side 1
-        chr_name = grch2ucsc[F[0]] if F[0] in grch2ucsc else F[0] 
-        gene1 = get_gene_info(chr_name, F[1], ref_gene_tb, ens_gene_tb)
+        gene1 = get_gene_info(F[0], F[1], ref_gene_tb, ens_gene_tb)
         
         # check gene annotation for the side 2
-        chr_name = grch2ucsc[F[3]] if F[3] in grch2ucsc else F[3]
-        gene2 = get_gene_info(chr_name, F[4], ref_gene_tb, ens_gene_tb)
+        gene2 = get_gene_info(F[3], F[4], ref_gene_tb, ens_gene_tb)
 
         # check exon-intron junction annotation for the side 1 
-        chr_name = grch2ucsc[F[0]] if F[0] in grch2ucsc else F[0]
-        junction1 = get_junc_info(chr_name, F[1], ref_exon_tb, ens_exon_tb, junction_margin) 
+        junction1 = get_junc_info(F[0], F[1], ref_exon_tb, ens_exon_tb, junction_margin) 
 
         # check exon-intron junction annotation for the side 2 
-        chr_name = grch2ucsc[F[3]] if F[3] in grch2ucsc else F[3]
-        junction2 = get_junc_info(chr_name, F[4], ref_exon_tb, ens_exon_tb, junction_margin)
+        junction2 = get_junc_info(F[3], F[4], ref_exon_tb, ens_exon_tb, junction_margin)
 
         sameGeneFlag = 0
         for g1 in gene1:
@@ -162,6 +194,18 @@ def filterAndAnnotation(inputFilePath, outputFilePath):
 
     hIN.close()
     hOUT.close()
+
+
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refGene.bed.gz"])
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz"])
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz"])
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensExon.bed.gz"])
+
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refGene.bed.gz.tbi"])
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz.tbi"])
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz.tbi"])
+    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensExon.bed.gz.tbi"])
+
 
 
 def merge_fusion_result(input_dir, output_file_path):
