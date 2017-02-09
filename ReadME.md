@@ -12,7 +12,7 @@ and integrating our software into the pipeline will come very easily to you!
 ## Dependency
 
 ### Python
-Python (>= 2.7), `pysam (>= 0.8.1)` packages
+Python (>= 2.7), `pysam (>= 0.8.1)`and [`annot_utils`](https://github.com/friend1ws/annot_utils) packages.
 
 ### Software
 blat
