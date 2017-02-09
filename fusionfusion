@@ -19,14 +19,14 @@ parser.add_argument("--th2", metavar = "th2.bam", default = None, type = str,
 parser.add_argument("--out", metavar = "output_dir", default = None, type = str, required=True,
                     help = "the path to the output directory")
 
+parser.add_argument("--reference_genome", metavar = "reference.fa", default = None, type = str, required=True,
+                    help = "reference genome used for creating validation sequences")
+
 parser.add_argument("--grc", default = False, action = 'store_true',
                     help = "convert chromosome names to Genome Reference Consortium nomenclature (default: %(default)s)")
 
 parser.add_argument("--genome_id", choices = ["hg19", "hg38", "mm10"], default = "hg19",
                     help = "the genome id used for selecting UCSC-GRC chromosome name corresponding files (default: %(default)s)")
-
-parser.add_argument("--reference_genome", metavar = "reference.fa", default = None, type = str, required=True,
-                    help = "reference genome used for creating validation sequences")
 
 # parser.add_argument("--resource_dir", metavar = "resource_dir", type = str, required=True,
 #                     help = "annotation information directory")
