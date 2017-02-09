@@ -32,21 +32,28 @@ def get_gene_info(chr, pos, ref_gene_tb, ens_gene_tb):
         try:
             records = ens_gene_tb.fetch(chr, int(pos) - 1, int(pos) + 1)
         except Exception as inst:
-            print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
+            # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
             tabixErrorFlag = 1
-            
+           
+        """ 
         # for ensGene, just the longest gene is shown
         temp_length = 0
         temp_gene = ""
         if tabixErrorFlag == 0:
             for record_line in records:
                 record = record_line.split('\t')
-                if True:
-                # if int(record[4]) > temp_length:
+                if int(record[4]) > temp_length:
                      temp_gene = record[3]
     
             if temp_gene != "": gene.append(temp_gene)
-            
+        """
+
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                gene.append(record[3])
+
+ 
     if len(gene) == 0: gene.append("---")
 
     return list(set(gene))
@@ -81,7 +88,8 @@ def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
         except Exception as inst:
             # print >> sys.stderr, "%s: %s" % (type(inst), inst.args)
             tabixErrorFlag = 1
-             
+
+        """             
         # for ensGene, just the longest gene is shown
         temp_length = 0
         temp_junc = ""
@@ -98,7 +106,18 @@ def get_junc_info(chr, pos, ref_exon_tb, ens_exon_tb, junction_margin):
                         if record[5] == "-": temp_junc = record[3] + ".start"
                 
             if temp_junc != "": junction.append(temp_junc)
+        """
 
+        if tabixErrorFlag == 0:
+            for record_line in records:
+                record = record_line.split('\t')
+                if abs(int(pos) - int(record[1])) < junction_margin:
+                    if record[5] == "+": junction.append(record[3] + ".start")
+                    if record[5] == "-": junction.append(record[3] + ".end")
+                if abs(int(pos) - int(record[2])) < junction_margin: 
+                    if record[5] == "+": junction.append(record[3] + ".end")
+                    if record[5] == "-": junction.append(record[3] + ".start")
+    
                 
     if len(junction) == 0: junction.append("---")
     
@@ -176,7 +195,7 @@ def filterAndAnnotation(inputFilePath, outputFilePath, genome_id, is_grc):
     hIN.close()
     hOUT.close()
 
-    """
+
     subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refGene.bed.gz"])
     subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz"])
     subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz"])
@@ -186,7 +205,7 @@ def filterAndAnnotation(inputFilePath, outputFilePath, genome_id, is_grc):
     subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz.tbi"])
     subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz.tbi"])
     subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensExon.bed.gz.tbi"])
-    """
+
 
 
 def merge_fusion_result(input_dir, output_file_path):

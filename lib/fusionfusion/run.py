@@ -14,7 +14,6 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
     # debug_mode = config.param_conf.getboolean("debug", "debug_mode")
     debug_mode = param_conf.debug
 
-    """
     parseJunctionInfo.clusterJuncInfo(inputFilePath,
                                       outputFilePrefix + ".chimeric.clustered.txt")
 
@@ -61,7 +60,6 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
                                          outputFilePrefix + ".chimeric.clustered.filt3.txt",
                                          outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt")
     
-    """
     annotationFunction.filterAndAnnotation(outputFilePrefix + ".chimeric.clustered.filt3.txt",
                                            outputFilePrefix + ".fusion.result.txt", args.genome_id, args.grc)
 
