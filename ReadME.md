@@ -21,8 +21,8 @@ blat
 
 First, download the latest release from the release section or type the following command
 ```
-wget https://github.com/Genomon-Project/fusionfusion/archive/v0.1.0.tar.gz
-tar zxvf v0.1.0.tar.gz
+wget https://github.com/Genomon-Project/fusionfusion/archive/v0.3.0rc1.tar.gz
+tar zxvf v0.3.0rc1.tar.gz
 ```
 
 Alternatively, you can download the latest developing version (which may be unstable)
@@ -32,7 +32,7 @@ git clone https://github.com/Genomon-Project/fusionfusion.git
 
 Then, install the package by standard python package protocol (https://docs.python.org/2/install/)
 ```
-cd fusionfusion-0.1.0
+cd fusionfusion-0.3.0rc1
 python setup.py build
 python setup.py install
 ```
@@ -62,23 +62,14 @@ For TopHat2, our software uses the read alignment file
 accepted_hits.bam
 ```
 
-Then, gene and exon annotation bed file should be prepared.
-The easiest way is
-```
-cd resource
-bash prepGeneInfo.sh
-```
-
-
 ## Commands
 
 ```
 fusionfusion [-h] [--version] [--star star.Chimeric.out.sam]
-                  [--ms2 ms2.bam] [--th2 th2.bam] 
-                  --out output_dir
-                  --reference_genome reference.fa 
-                  --resource_dir resource_dir 
-                  [--pooled_control_file POOLED_CONTROL_FILE]
+                  [--ms2 ms2.bam] [--th2 th2.bam] --out output_dir
+                  --reference_genome reference.fa [--grc]
+                  [--genome_id {hg19,hg38,mm10}]
+                  [--pooled_control_file POOLED_CONTROL_FILE] [--debug]
                   [--debug] [--abnormal_insert_size ABNORMAL_INSERT_SIZE]
                   [--min_major_clipping_size MIN_MAJOR_CLIPPING_SIZE]
                   [--min_read_pair_num MIN_READ_PAIR_NUM]
@@ -91,7 +82,10 @@ fusionfusion [-h] [--version] [--star star.Chimeric.out.sam]
                   [--filter_same_gene]
 ```
 At least one of --star, --ms2, --th2 arguments should be specified.
-The arguments of --out, resource_dir, resource_dir are mandatory.
+The arguments of --out and --reference_genome are mandatory. 
+Set the genome model by --genome_id (default is hg19).
+Currently, we support hg19, hg38 and mm10.
+Also, if you are using GRC-based files (no "chr" in chromosome names), set --grc.
 For other arguments, please type `fusionfusion -h`.
 Although we believe default settings are fine for 100bp-length paired read data., 
 tuning *min_cover_size* may help improve the accuracy.
