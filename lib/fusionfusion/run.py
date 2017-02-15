@@ -44,7 +44,7 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
     reference_genome = param_conf.reference_genome
 
     FNULL = open(os.devnull, 'w')
-    fRet = subprocess.call([blat_path] + blat_options + [reference_genome, 
+    fRet = subprocess.check_call([blat_path] + blat_options + [reference_genome, 
                             outputFilePrefix + ".chimeric.clustered.splicing.contig.fa",
                             outputFilePrefix + ".chimeric.clustered.splicing.contig.psl"], stdout = FNULL, stderr = subprocess.STDOUT)
 
@@ -65,14 +65,14 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
 
     # delete intermediate files
     if debug_mode == False:
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.txt"])
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt1.txt"])
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt2.txt"])
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.filt3.txt"])
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.txt"])
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.fa"])
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.psl"])
-        subprocess.call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.txt"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.filt1.txt"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.filt2.txt"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.filt3.txt"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.txt"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.fa"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.psl"])
+        subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt"])
 
 
 def main(args):
@@ -122,36 +122,36 @@ def main(args):
                                              
 
         hOUT = open(output_dir + "/star.chimeric.txt", "w")
-        subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/star.chimeric.tmp.txt"], stdout = hOUT)
+        subprocess.check_call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/star.chimeric.tmp.txt"], stdout = hOUT)
         hOUT.close()
 
         cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star", args)
 
         if debug_mode == False:
-            subprocess.call(["rm", output_dir + "/star.chimeric.tmp.txt"])
-            subprocess.call(["rm", output_dir + "/star.chimeric.txt"])
+            subprocess.check_call(["rm", output_dir + "/star.chimeric.tmp.txt"])
+            subprocess.check_call(["rm", output_dir + "/star.chimeric.txt"])
 
     if ms2BamFile is not None:
 
         parseJunctionInfo.extractFusionReads_ms2(ms2BamFile, output_dir + "/ms2.chimeric.tmp.sam")
 
         hOUT = open(output_dir + "/ms2.chimeric.sam", "w")
-        subprocess.call(["sort", "-k1", output_dir + "/ms2.chimeric.tmp.sam"], stdout = hOUT)
+        subprocess.check_call(["sort", "-k1", output_dir + "/ms2.chimeric.tmp.sam"], stdout = hOUT)
         hOUT.close()
     
         parseJunctionInfo.parseJuncInfo_ms2(output_dir + "/ms2.chimeric.sam", output_dir + "/ms2.chimeric.tmp.txt", args.abnormal_insert_size) 
 
         hOUT = open(output_dir + "/ms2.chimeric.txt", "w")
-        subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/ms2.chimeric.tmp.txt"], stdout = hOUT)
+        subprocess.check_call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/ms2.chimeric.tmp.txt"], stdout = hOUT)
         hOUT.close()
 
         cluster_filter_junction(output_dir + "/ms2.chimeric.txt", output_dir + "/ms2", args)
 
         if debug_mode == False:
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.sam"])
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.sam"])
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.tmp.txt"])
-            subprocess.call(["rm", output_dir + "/ms2.chimeric.txt"])
+            subprocess.check_call(["rm", output_dir + "/ms2.chimeric.tmp.sam"])
+            subprocess.check_call(["rm", output_dir + "/ms2.chimeric.sam"])
+            subprocess.check_call(["rm", output_dir + "/ms2.chimeric.tmp.txt"])
+            subprocess.check_call(["rm", output_dir + "/ms2.chimeric.txt"])
 
 
     if th2BamFile is not None:
@@ -159,21 +159,21 @@ def main(args):
         parseJunctionInfo.extractFusionReads_th2(th2BamFile, output_dir + "/th2.chimeric.tmp.sam")
 
         hOUT = open(output_dir + "/th2.chimeric.sam", "w")
-        subprocess.call(["sort", "-k1", output_dir + "/th2.chimeric.tmp.sam"], stdout = hOUT)
+        subprocess.check_call(["sort", "-k1", output_dir + "/th2.chimeric.tmp.sam"], stdout = hOUT)
         hOUT.close()
         parseJunctionInfo.parseJuncInfo_th2(output_dir + "/th2.chimeric.sam", output_dir + "/th2.chimeric.tmp.txt", args.abnormal_insert_size)
         
         hOUT = open(output_dir + "/th2.chimeric.txt", "w")
-        subprocess.call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/th2.chimeric.tmp.txt"], stdout = hOUT)
+        subprocess.check_call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/th2.chimeric.tmp.txt"], stdout = hOUT)
         hOUT.close()
 
         cluster_filter_junction(output_dir + "/th2.chimeric.txt", output_dir + "/th2", args)
 
         if debug_mode == False:
-            subprocess.call(["rm", output_dir + "/th2.chimeric.tmp.sam"])
-            subprocess.call(["rm", output_dir + "/th2.chimeric.sam"])
-            subprocess.call(["rm", output_dir + "/th2.chimeric.tmp.txt"])
-            subprocess.call(["rm", output_dir + "/th2.chimeric.txt"])
+            subprocess.check_call(["rm", output_dir + "/th2.chimeric.tmp.sam"])
+            subprocess.check_call(["rm", output_dir + "/th2.chimeric.sam"])
+            subprocess.check_call(["rm", output_dir + "/th2.chimeric.tmp.txt"])
+            subprocess.check_call(["rm", output_dir + "/th2.chimeric.txt"])
 
 
     annotationFunction.merge_fusion_result(output_dir, 

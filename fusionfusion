@@ -5,7 +5,7 @@ import argparse
 
 parser = argparse.ArgumentParser(prog = "fusionfusion")
 
-parser.add_argument("--version", action = "version", version = "fusionfusion-0.3.0rc1")
+parser.add_argument("--version", action = "version", version = "fusionfusion-0.3.0rc2")
 
 parser.add_argument("--star", metavar = "star.Chimeric.out.sam", default = None, type = str,
                     help = "the path to the chimeric sam file by STAR")

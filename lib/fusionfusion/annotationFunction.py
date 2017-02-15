@@ -196,15 +196,15 @@ def filterAndAnnotation(inputFilePath, outputFilePath, genome_id, is_grc):
     hOUT.close()
 
 
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refGene.bed.gz"])
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz"])
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz"])
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensExon.bed.gz"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.refGene.bed.gz"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.ensExon.bed.gz"])
 
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refGene.bed.gz.tbi"])
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz.tbi"])
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz.tbi"])
-    subprocess.call(["rm", "-rf", outputFilePath + ".tmp.ensExon.bed.gz.tbi"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.refGene.bed.gz.tbi"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.ensGene.bed.gz.tbi"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.refExon.bed.gz.tbi"])
+    subprocess.check_call(["rm", "-rf", outputFilePath + ".tmp.ensExon.bed.gz.tbi"])
 
 
 
