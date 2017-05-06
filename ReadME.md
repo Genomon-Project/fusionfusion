@@ -21,8 +21,8 @@ Python (>= 2.7), `pysam (>= 0.8.1)`and [`annot_utils`](https://github.com/friend
 
 First, download the latest release from the release section or type the following command
 ```
-wget https://github.com/Genomon-Project/fusionfusion/archive/v0.3.0rc1.tar.gz
-tar zxvf v0.3.0rc1.tar.gz
+wget https://github.com/Genomon-Project/fusionfusion/archive/v0.3.0.tar.gz
+tar zxvf v0.3.0.tar.gz
 ```
 
 Alternatively, you can download the latest developing version (which may be unstable)
@@ -32,7 +32,7 @@ git clone https://github.com/Genomon-Project/fusionfusion.git
 
 Then, install the package by standard python package protocol (https://docs.python.org/2/install/)
 ```
-cd fusionfusion-0.3.0rc1
+cd fusionfusion-0.3.0
 python setup.py build
 python setup.py install
 ```
