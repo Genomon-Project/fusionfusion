@@ -442,7 +442,7 @@ def getFusInfo_STAR(juncLine):
         juncPos_SA = ""
 
         # the pair read is aligned at the same chromosome with the primary read
-        if dir_primary == "-" and dir_pair == "+" and chr_primary == chr_pair and 0 <= pos_primary - pos_pair < abnormal_insert_size:
+        if dir_primary == "-" and dir_pair == "+" and chr_primary == chr_pair and -10 <= pos_primary - pos_pair < abnormal_insert_size:
 
             if dir_SA == "+" and expected_clipDir_SA == "+" and right_clipping_SA > 0:
                 clipLen_SA = right_clipping_SA
@@ -514,7 +514,7 @@ def getFusInfo_STAR(juncLine):
         juncDir_SA = ""
         juncPos_SA = ""
         # the pair read is aligned at the same chromosome with the primary read
-        if dir_primary == "+" and dir_pair == "-" and chr_primary == chr_pair and 0 <= pos_pair - pos_primary < abnormal_insert_size:
+        if dir_primary == "+" and dir_pair == "-" and chr_primary == chr_pair and -10 <= pos_pair - pos_primary < abnormal_insert_size:
 
             if dir_SA == "+" and expected_clipDir_SA == "+" and right_clipping_SA > 0:
                 clipLen_SA = right_clipping_SA
