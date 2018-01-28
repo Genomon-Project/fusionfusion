@@ -24,7 +24,7 @@ class TestMain(unittest.TestCase):
         cur_dir = os.path.dirname(os.path.abspath(__file__))
         tmp_dir = tempfile.mkdtemp()
 
-        star_chimeric_sam = cur_dir + "/data/resource/star/MCF-7.Chimeric.out.sam"
+        star_chimeric_sam = cur_dir + "/resource/star/MCF-7.Chimeric.out.sam"
         output_dir = tmp_dir 
         ref_genome = cur_dir + "/resource/reference_genome/GRCh37.fa"
  
