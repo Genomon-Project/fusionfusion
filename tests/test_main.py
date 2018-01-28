@@ -29,7 +29,7 @@ class TestMain(unittest.TestCase):
         ref_genome = cur_dir + "/resource/reference_genome/GRCh37.fa"
  
         output_file = tmp_dir + "/fusion_fusion.result.txt "
-        answer_file = cur_dir + "/data/fusion/MCF-7/fusion_fusion.result.txt "
+        answer_file = cur_dir + "/fusion_fusion.result.txt "
 
         print ' '.join(["--star", star_chimeric_sam, "--out", output_dir, "--reference_genome", ref_genome, "--grc"])
         args = self.parser.parse_args(["--star", star_chimeric_sam, "--out", output_dir, "--reference_genome", ref_genome, "--grc"])
@@ -37,7 +37,7 @@ class TestMain(unittest.TestCase):
 
         self.assertTrue(filecmp.cmp(output_file, answer_file, shallow=False))
 
-        # shutil.rmtree(tmp_dir)
+        shutil.rmtree(tmp_dir)
 
 if __name__ == "__main__":
     unittest.main()
