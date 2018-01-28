@@ -1,5 +1,8 @@
 # fusionfusion 
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Build Status](https://travis-ci.org/Genomon-Project/fusionfusion.svg?branch=devel)](https://travis-ci.org/Genomon-Project/fusionfusion)
+
 ## Introduction
 
 fusionfusion is a software for detecting gene fusion 
