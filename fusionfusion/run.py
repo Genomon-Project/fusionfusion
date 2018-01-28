@@ -75,7 +75,7 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
         subprocess.check_call(["rm", outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt"])
 
 
-def main(args):
+def fusionfusion_main(args):
 
     starBamFile = args.star
     ms2BamFile = args.ms2
