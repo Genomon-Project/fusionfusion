@@ -12,4 +12,5 @@ before_script:
 
 script:
   - pip install . 
+  - which blat
   - python setup.py test
