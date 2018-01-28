@@ -28,8 +28,8 @@ class TestMain(unittest.TestCase):
         output_dir = tmp_dir 
         ref_genome = cur_dir + "/resource/reference_genome/GRCh37.fa"
  
-        output_file = tmp_dir + "/fusion_fusion.result.txt "
-        answer_file = cur_dir + "/fusion_fusion.result.txt "
+        output_file = tmp_dir + "/fusion_fusion.result.txt"
+        answer_file = cur_dir + "/data/fusion/MCF-7/fusion_fusion.result.txt"
 
         print ' '.join(["--star", star_chimeric_sam, "--out", output_dir, "--reference_genome", ref_genome, "--grc"])
         args = self.parser.parse_args(["--star", star_chimeric_sam, "--out", output_dir, "--reference_genome", ref_genome, "--grc"])
