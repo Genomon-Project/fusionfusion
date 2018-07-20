@@ -39,19 +39,25 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
     # blat_path = config.param_conf.get("alignment", "blat_path")
     # blat_options = config.param_conf.get("alignment", "blat_option").split(" ")
     # reference_genome = config.param_conf.get("alignment", "reference_genome")
-    blat_path = "blat"
-    blat_options = ["-stepSize=5", "-repMatch=2253"]
-    reference_genome = param_conf.reference_genome
+    if os.path.getsize(outputFilePrefix + ".chimeric.clustered.splicing.contig.fa") > 0 :
 
-    FNULL = open(os.devnull, 'w')
-    fRet = subprocess.check_call([blat_path] + blat_options + [reference_genome, 
+        blat_path = "blat"
+        blat_options = ["-stepSize=5", "-repMatch=2253"]
+        reference_genome = param_conf.reference_genome
+
+        FNULL = open(os.devnull, 'w')
+        fRet = subprocess.check_call([blat_path] + blat_options + [reference_genome, 
                             outputFilePrefix + ".chimeric.clustered.splicing.contig.fa",
                             outputFilePrefix + ".chimeric.clustered.splicing.contig.psl"], stdout = FNULL, stderr = subprocess.STDOUT)
 
-    FNULL.close()
-    if fRet != 0:
-        print >> sys.stderr, "blat error, error code: " + str(fRet)
-        sys.exit()
+        FNULL.close()
+        if fRet != 0:
+            print >> sys.stderr, "blat error, error code: " + str(fRet)
+            sys.exit()
+    else:
+        shutil.copyfile(outputFilePrefix + ".chimeric.clustered.splicing.contig.fa",
+                         outputFilePrefix + ".chimeric.clustered.splicing.contig.psl")
+        
 
     filterJunctionInfo.checkMatching(outputFilePrefix + ".chimeric.clustered.splicing.contig.psl",
                                      outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt")
