@@ -23,8 +23,9 @@ RUN pip install --upgrade setuptools
 
 RUN pip install pysam==0.13
 RUN pip install annot-utils==0.2.0
-RUN git clone https://github.com/aokad/fusionfusion.git && \
-    cd fusionfusion && \
+RUN wget https://github.com/aokad/fusionfusion/archive/v0.4.1.tar.gz && \
+    tar -zxvf v0.4.1.tar.gz && \
+    cd fusionfusion-0.4.1 && \
     python setup.py build install
 
 RUN apt-get update && apt-get install -y \
