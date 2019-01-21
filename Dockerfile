@@ -23,7 +23,7 @@ RUN pip install --upgrade setuptools
 
 RUN pip install pysam==0.13
 RUN pip install annot-utils==0.2.0
-RUN pip install fusionfusion==0.4.0
+RUN pip install fusionfusion==0.4.1
 
 
 RUN apt-get update && apt-get install -y \
