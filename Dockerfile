@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     gcc \
     zlib1g-dev \
     python \
-    python-pip
+    python-pip \
+    libbz2-dev
 
 RUN wget https://github.com/samtools/htslib/releases/download/1.7/htslib-1.7.tar.bz2 && \
     tar jxvf htslib-1.7.tar.bz2 && \
