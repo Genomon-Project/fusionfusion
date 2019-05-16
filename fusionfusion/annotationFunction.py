@@ -1,11 +1,12 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
 import sys, pysam, os, subprocess
 import annot_utils.gene
 import annot_utils.exon
 
 # import config
-from config import *
+from .config import *
 
 junction_margin = 5
 
@@ -189,8 +190,8 @@ def filterAndAnnotation(inputFilePath, outputFilePath, genome_id, is_grc):
 
         if filter_same_gene == True and sameGeneFlag == 1: continue
 
-        print >> hOUT, '\t'.join(F[0:8]) + '\t' + ';'.join(gene1) + '\t' + ';'.join(junction1) + '\t' + ';'.join(gene2) + '\t' + ';'.join(junction2) + '\t' + \
-                         F[11] + '\t' + F[12] + '\t' + F[16] + '\t' + F[17]
+        print('\t'.join(F[0:8]) + '\t' + ';'.join(gene1) + '\t' + ';'.join(junction1) + '\t' + ';'.join(gene2) + '\t' + ';'.join(junction2) + '\t' + \
+              F[11] + '\t' + F[12] + '\t' + F[16] + '\t' + F[17], file = hOUT)
 
     hIN.close()
     hOUT.close()
@@ -240,8 +241,8 @@ def merge_fusion_result(input_dir, output_file_path):
                 key = '\t'.join(F[0:7] + F[8:12])
                 fus2count_th2[key] = F[7]
 
-    fus_keys = list(set(fus2count_star.keys() + fus2count_ms2.keys() + fus2count_th2.keys()))
-    hOUT = open(output_file_path, 'w')
+    fus_keys = list(set(list(fus2count_star) + list(fus2count_ms2) + list(fus2count_th2)))
+    hOUT = open(output_file_path + ".unsorted.tmp", 'w')
 
     for fus in fus_keys:
         count_star = fus2count_star[fus] if fus in fus2count_star else "---"
@@ -253,6 +254,13 @@ def merge_fusion_result(input_dir, output_file_path):
         if label_star == 1: print_line = print_line + '\t' + count_star
         if label_th2 == 1: print_line = print_line + '\t' + count_th2
 
-        print >> hOUT, print_line
+        print(print_line, file = hOUT)
 
     hOUT.close()
+
+    hOUT = open(output_file_path, 'w')
+    subprocess.check_call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_file_path + '.unsorted.tmp'], stdout = hOUT)
+    hOUT.close()
+
+    subprocess.check_call(["rm", "-rf", output_file_path + ".unsorted.tmp"])
+ 

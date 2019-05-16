@@ -1,13 +1,15 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+
 import sys, os, argparse, subprocess, shutil
-import parseJunctionInfo
-import filterJunctionInfo
-import annotationFunction
-import utils
+from . import parseJunctionInfo
+from . import filterJunctionInfo
+from . import annotationFunction
+from . import utils
 
 # import config
-from config import *
+from .config import *
 
 def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
 
@@ -52,7 +54,7 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
 
         FNULL.close()
         if fRet != 0:
-            print >> sys.stderr, "blat error, error code: " + str(fRet)
+            print("blat error, error code: " + str(fRet), file = sys.stderr)
             sys.exit()
 
         filterJunctionInfo.checkMatching(outputFilePrefix + ".chimeric.clustered.splicing.contig.psl",
@@ -87,7 +89,7 @@ def fusionfusion_main(args):
     output_dir = args.out
 
     if starBamFile == None and ms2BamFile  == None and th2BamFile == None:
-        print >> sys.stderr, "At least one of --star, --ms2 or --th2 should be included"
+        print("At least one of --star, --ms2 or --th2 should be included", file = sys.stderr)
         sys.exit(1)
  
     # config.param_conf.read(args.param)

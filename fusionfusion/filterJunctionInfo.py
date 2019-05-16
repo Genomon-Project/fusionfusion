@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+
 import re
-import regions, seq_utils, region_utils
 import pysam
 
 # import config
-from config import *
+from .config import *
+from . import regions, seq_utils, region_utils
 
 regRe = re.compile(r'([^ \t\n\r\f\v,]+):(\d+)\-(\d+)')
 ReContig = re.compile(r'([^ \t\n\r\f\v,]+):([\+\-])(\d+)\-([^ \t\n\r\f\v,]+):([\+\-])(\d+)_contig([12])')
@@ -42,8 +44,8 @@ def filterCoverRegion(inputFilePath, outputFilePath):
         if len(uniqueCoverdRegion_meta) < min_read_pair_num: continue
 
         # check the maximum anchor size
-        coverRegionSize_primary = map(region_utils.getCoverSize, coveredRegion_primary)
-        coverRegionSize_SA = map(region_utils.getCoverSize, coveredRegion_SA)
+        coverRegionSize_primary = list(map(region_utils.getCoverSize, coveredRegion_primary))
+        coverRegionSize_SA = list(map(region_utils.getCoverSize, coveredRegion_SA))
         anchor_size = [min(coverRegionSize_primary[i], coverRegionSize_SA[i]) for i in range(len(coverRegionSize_primary))]
         if max(anchor_size) < anchor_size_thres: continue
 
@@ -88,7 +90,7 @@ def filterCoverRegion(inputFilePath, outputFilePath):
 
         if region1.regionSize() < min_cover_size or region2.regionSize() < min_cover_size: continue
 
-        print >> hOUT, '\t'.join(F)
+        print('\t'.join(F), file = hOUT)
 
     hIN.close()
     hOUT.close()
@@ -124,7 +126,7 @@ def filterPoolControl(input_file, output_file, control_file):
                         control_flag = 1
 
             if control_flag == 0:
-                print >> hout, '\t'.join(F)
+                print('\t'.join(F), file = hout)
 
     hout.close()
 
@@ -475,7 +477,7 @@ def extractSplicingPattern(inputFilePath, outputFilePath):
         if F[2] == "+": contigSeq1 = seq_utils.reverseComplement(contigSeq1)
         if F[5] == "+": contigSeq2 = seq_utils.reverseComplement(contigSeq2)
 
-        print >> hOUT, '\t'.join(['\t'.join(F[0:6]), str(inSeq), str(len(F[8].split(';'))), str(contig1), str(contig2), contigSeq1, contigSeq2])
+        print('\t'.join(['\t'.join(F[0:6]), str(inSeq), str(len(F[8].split(';'))), str(contig1), str(contig2), contigSeq1, contigSeq2]), file = hOUT)
 
 
     hIN.close()
@@ -491,11 +493,11 @@ def makeJucSeqPairFa(inputFilePath, outputFilePath):
     for line in hIN:
         F = line.rstrip('\n').split('\t')
 
-        print >> hOUT, '>' + F[0] + ":" + F[2] + F[1] + "-" + F[3] + ":" + F[5] + F[4] + "_contig" + '1'
-        print >> hOUT, F[10]
+        print('>' + F[0] + ":" + F[2] + F[1] + "-" + F[3] + ":" + F[5] + F[4] + "_contig" + '1', file = hOUT)
+        print(F[10], file = hOUT)
 
-        print >> hOUT, '>' + F[0] + ":" + F[2] + F[1] + "-" + F[3] + ":" + F[5] + F[4] + "_contig" + '2'
-        print >> hOUT, F[11]
+        print('>' + F[0] + ":" + F[2] + F[1] + "-" + F[3] + ":" + F[5] + F[4] + "_contig" + '2', file = hOUT)
+        print(F[11], file = hOUT)
 
     hIN.close()
     hOUT.close()
@@ -527,7 +529,7 @@ def checkMatching(inputFilePath, outputFilePath):
                     if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
                     if len(otherMatch) >= 10: break
                 otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
-                print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore) + '\t' + str(targetSize)
+                print(tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore) + '\t' + str(targetSize), file = hOUT)
 
             tempID = F[9]
             targetAln = "---"
@@ -541,8 +543,8 @@ def checkMatching(inputFilePath, outputFilePath):
         chr1, strand1, pos1, chr2, strand2, pos2, contigNum = "", "", "", "", "", "", 0
         contigMatch = ReContig.match(F[9])
         if contigMatch is None:
-            print >> sys.stderr, "the format of the fasta name is inconsistent at"
-            print >> sys.stderr, '\t'.join(F)
+            print("the format of the fasta name is inconsistent at", file = sys.stderr)
+            print('\t'.join(F), file = sys.stderr)
 
         contigNum = contigMatch.group(7)
         if contigNum == "1":
@@ -571,7 +573,7 @@ def checkMatching(inputFilePath, outputFilePath):
             if value >= targetScore - min_allowed_contig_match_diff: otherMatch.append(site)
             if len(otherMatch) >= 10: break
         otherMatch_str = ("---" if len(otherMatch) == 0 else ';'.join(otherMatch))
-        print >> hOUT, tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore) + '\t' + str(targetSize)
+        print(tempID + '\t' + targetAln + '\t' + otherMatch_str + '\t' + str(crossMatch) + '\t' + str(targetScore) + '\t' + str(targetSize), file = hOUT)
 
     hOUT.close()
 
@@ -619,7 +621,7 @@ def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile):
         if float(matches1[2]) > 0 or float(matches2[2]) > 0: continue
         # if int(matches1[3]) < min_cover_size or int(matches2[3]) < min_cover_size: continue
 
-        print >> hOUT, key + '\t' + F[6] + '\t' + F[7] + '\t' +  match1 + '\t' + match2
+        print(key + '\t' + F[6] + '\t' + F[7] + '\t' +  match1 + '\t' + match2, file = hOUT)
 
     hIN.close()
     hOUT.close()

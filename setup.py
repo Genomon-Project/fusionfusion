@@ -11,7 +11,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name = 'fusionfusion',
-    version = '0.4.1',
+    version = '0.5.0b1',
     description='Python tools for extracting highly confident fusion transcripts from the results of several RNA-seq alignment tools.',
     url = 'https://github.com/friend1ws/fusionfusion',
     author = 'Yuichi Shiraishi',

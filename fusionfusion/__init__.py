@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-from arg_parser import create_parser
-from run import fusionfusion_main 
+from .arg_parser import create_parser
+from .run import fusionfusion_main 
 
 def main():
 

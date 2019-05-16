@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 
+from __future__ import print_function
+
 import sys
 import re
-import cigar_utils
 import pysam
 import collections
 # import config
-from config import *
+from .config import *
+from . import cigar_utils
 
 # for mapsplice2
 ReFus_ms2 = re.compile('FUS_(\d+)_(\d+)\(([\-\+])([\-\+])\)')
@@ -263,7 +265,7 @@ def parseJuncInfo_ms2(inputFilePath, outputFilePath):
             if fusInfo.count(0) != len(tempLine):
                 tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo)
                 if tempFusInfo is not None:
-                    print >> hOUT, tempFusInfo
+                    print(tempFusInfo, file = hOUT)
 
             tempID = F[0]
             fusFlag = []
@@ -285,7 +287,7 @@ def parseJuncInfo_ms2(inputFilePath, outputFilePath):
     if fusInfo.count(0) != len(tempLine):
         tempFusInfo = getFusInfo_ms2(tempID, tempLine, fusInfo)
         if tempFusInfo is not None:
-            print >> hOUT, tempFusInfo
+            print(tempFusInfo, file = hOUT)
 
     hOUT.close()
 
@@ -313,7 +315,7 @@ def parseJuncInfo_th2(inputFilePath, outputFilePath):
             if fusInfo.count('*') != len(tempLine):
                 tempFusInfo = getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag)
                 if tempFusInfo is not None:
-                    print >> hOUT, tempFusInfo
+                    print(tempFusInfo, file = hOUT)
 
             tempID = F[0]
             fusInfo = []
@@ -335,7 +337,7 @@ def parseJuncInfo_th2(inputFilePath, outputFilePath):
     if fusInfo.count('*') != len(tempLine):
         tempFusInfo = getFusInfo_th2(tempID, tempLine, fusInfo, SAFlag)
         if tempFusInfo is not None:
-            print >> hOUT, tempFusInfo
+            print(tempFusInfo, file = hOUT)
 
 
     hOUT.close()
@@ -367,7 +369,7 @@ def getFusInfo_STAR(juncLine):
         if flags[8] != "1": continue
 
         if chr_SA != "":
-            print >> sys.stderr, "Multiple supplementary alignment at:" + '\n' +  '\n'.join(juncLine)
+            print("Multiple supplementary alignment at:" + '\n' +  '\n'.join(juncLine), file = sys.stderr)
 
         chr_SA = F[2]
         juncChr_SA = F[2]
@@ -378,7 +380,7 @@ def getFusInfo_STAR(juncLine):
         endPos_SA = cigar_utils.getEndPos(pos_SA, F[5])
 
         flags_SA = flags
-        if flags_SA[6] == flags_SA[7]: print >> sys.stderr, "The supplementary Read is both first and second reads at:" + '\n' + '\n'.join(juncLine)
+        if flags_SA[6] == flags_SA[7]: print("The supplementary Read is both first and second reads at:" + '\n' + '\n'.join(juncLine), file = sys.stderr)
 
         tempMatch = cigarSRe_right.search(F[5])
         if tempMatch is not None: right_clipping_SA = int(tempMatch.group(1))
@@ -423,7 +425,7 @@ def getFusInfo_STAR(juncLine):
             mq_pair = F[4]
             coverRegion_pair = cigar_utils.getCoverRegion(F[2], F[3], F[5])
         else:
-            print >> sys.stderr, "The following read is both first and second reads at:" + '\n' + line
+            print("The following read is both first and second reads at:" + '\n' + line, file = sys.stderr)
 
 
     if right_clipping_primary >= min_major_clip_size:
@@ -589,7 +591,7 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath):
             if tempID != "" and len(tempLine) == 3:
                 tempFusInfo = getFusInfo_STAR(tempLine)
                 if tempFusInfo is not None:
-                    print >> hOUT, tempFusInfo
+                    print(tempFusInfo, file = hOUT)
 
             tempID = F[0]
             tempLine = []
@@ -602,7 +604,7 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath):
     if tempID != "" and len(tempLine) == 3:
         tempFusInfo = getFusInfo_STAR(tempLine)
         if tempFusInfo is not None:
-            print >> hOUT, tempFusInfo
+            print(tempFusInfo, file = hOUT)
 
 
     hOUT.close()
@@ -640,11 +642,11 @@ def clusterJuncInfo(inputFilePath, outputFilePath):
                 best_junc = junc_counter.most_common(1)[0][0]
                 btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq = best_junc.split('\t') 
 
-                print >> hOUT, '\t'.join([btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq, \
-                                    ';'.join(cluster_id[key]), ';'.join(cluster_MQ_primary[key]), ';'.join(cluser_cover_primary[key]), ';'.join(cluster_dir_primary[key]), \
-                                    ';'.join(cluster_MQ_pair[key]), ';'.join(cluster_cover_pair[key]), ';'.join(cluster_dir_pair[key]), \
-                                    ';'.join(cluster_MQ_SA[key]), ';'.join(cluster_cover_SA[key]), ';'.join(cluster_dir_SA[key]), \
-                                    ';'.join(cluster_pair_pos[key]), ';'.join(cluster_primary_pos[key])])
+                print('\t'.join([btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq, \
+                      ';'.join(cluster_id[key]), ';'.join(cluster_MQ_primary[key]), ';'.join(cluser_cover_primary[key]), ';'.join(cluster_dir_primary[key]), \
+                      ';'.join(cluster_MQ_pair[key]), ';'.join(cluster_cover_pair[key]), ';'.join(cluster_dir_pair[key]), \
+                      ';'.join(cluster_MQ_SA[key]), ';'.join(cluster_cover_SA[key]), ';'.join(cluster_dir_SA[key]), \
+                      ';'.join(cluster_pair_pos[key]), ';'.join(cluster_primary_pos[key])]), file = hOUT)
 
 
                 # add to the deletion list (later the key will be removed from the dictionaries)
@@ -726,11 +728,11 @@ def clusterJuncInfo(inputFilePath, outputFilePath):
         best_junc = junc_counter.most_common(1)[0][0]
         btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq = best_junc.split('\t')
 
-        print >> hOUT, '\t'.join([btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq, \
-                            ';'.join(cluster_id[key]), ';'.join(cluster_MQ_primary[key]), ';'.join(cluser_cover_primary[key]), ';'.join(cluster_dir_primary[key]), \
-                            ';'.join(cluster_MQ_pair[key]), ';'.join(cluster_cover_pair[key]), ';'.join(cluster_dir_pair[key]), \
-                            ';'.join(cluster_MQ_SA[key]), ';'.join(cluster_cover_SA[key]), ';'.join(cluster_dir_SA[key]), \
-                            ';'.join(cluster_pair_pos[key]), ';'.join(cluster_primary_pos[key])])
+        print('\t'.join([btchr1, btpos1, btdir1, btchr2, btpos2, btdir2, btinseq, \
+              ';'.join(cluster_id[key]), ';'.join(cluster_MQ_primary[key]), ';'.join(cluser_cover_primary[key]), ';'.join(cluster_dir_primary[key]), \
+              ';'.join(cluster_MQ_pair[key]), ';'.join(cluster_cover_pair[key]), ';'.join(cluster_dir_pair[key]), \
+              ';'.join(cluster_MQ_SA[key]), ';'.join(cluster_cover_SA[key]), ';'.join(cluster_dir_SA[key]), \
+              ';'.join(cluster_pair_pos[key]), ';'.join(cluster_primary_pos[key])]), file = hOUT)
 
 
     hOUT.close()
