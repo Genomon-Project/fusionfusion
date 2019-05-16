@@ -13,6 +13,7 @@ before_script:
   - chmod a+x blat && export PATH=$PATH:$PWD 
   - pip install annot_utils==0.3.0b3
   - pip install pysam
+  - pip install requests
 
 script:
   - pip install . 
