@@ -13,6 +13,8 @@ setup(
     name = 'fusionfusion',
     version = '0.5.0b1',
     description='Python tools for extracting highly confident fusion transcripts from the results of several RNA-seq alignment tools.',
+    long_description=long_description, 
+    long_description_content_type='text/markdown',  
     url = 'https://github.com/friend1ws/fusionfusion',
     author = 'Yuichi Shiraishi',
     author_email = 'friend1ws@gamil.com',
@@ -24,6 +26,8 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: Unix',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Scientific/Engineering :: Bio-Informatics'
     ],
 
