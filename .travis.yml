@@ -11,7 +11,7 @@ before_script:
   - cd htslib-1.9 && make && export PATH=$PATH:$PWD && cd ..
   - wget http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/blat
   - chmod a+x blat && export PATH=$PATH:$PWD 
-  - pip install annot_utils==0.3.0b3
+  - pip install annot_utils
   - pip install pysam
   - pip install requests
 
