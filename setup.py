@@ -7,7 +7,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 def get_version():
-    with open(path.join(here, "junc_utils/version.py"), encoding = 'utf-8') as hin:
+    with open(path.join(here, "fusionfusion/version.py"), encoding = 'utf-8') as hin:
         for line in hin:
             if line.startswith("__version__"):
                 version = line.partition('=')[2]
