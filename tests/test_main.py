@@ -38,7 +38,9 @@ class TestMain(unittest.TestCase):
         fusionfusion.run.fusionfusion_main(args)
 
         # self.assertTrue(filecmp.cmp(output_file, answer_file, shallow=False))
-        self.assertTrue(160 <= len(open(tmp_dir + "/fusion_fusion.result.txt", 'r').readlines()) <= 165)
+        with open(tmp_dir + "/fusion_fusion.result.txt", 'r') as hin: record_num = len(hin.readlines())
+
+        self.assertTrue(160 <= record_num <= 165)
 
         shutil.rmtree(tmp_dir)
 

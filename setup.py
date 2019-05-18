@@ -6,12 +6,20 @@ from os import path
 
 here = path.abspath(path.dirname(__file__))
 
+def get_version():
+    with open(path.join(here, "junc_utils/version.py"), encoding = 'utf-8') as hin:
+        for line in hin:
+            if line.startswith("__version__"):
+                version = line.partition('=')[2]
+                return version.strip().strip('\'"')
+    raise ValueError('Could not find version.')
+
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
     name = 'fusionfusion',
-    version = '0.5.0b1',
+    version = get_version(),
     description='Python tools for extracting highly confident fusion transcripts from the results of several RNA-seq alignment tools.',
     long_description=long_description, 
     long_description_content_type='text/markdown',  

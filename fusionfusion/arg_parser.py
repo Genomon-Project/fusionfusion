@@ -1,13 +1,17 @@
 #! /usr/bin/env python
 
-from .run import *
 import argparse
+
+from .run import *
+from .version import __version__
+
 
 def create_parser():
 
     parser = argparse.ArgumentParser(prog = "fusionfusion")
 
-    parser.add_argument("--version", action = "version", version = "fusionfusion-0.5.0b1")
+    parser.add_argument("--version", action = "version", version = "%(prog)s " + __version__)
+    # parser.add_argument("--version", action = "version", version = "fusionfusion-0.5.0b1")
 
     parser.add_argument("--star", metavar = "star.Chimeric.out.sam", default = None, type = str,
                         help = "the path to the chimeric sam file by STAR")
