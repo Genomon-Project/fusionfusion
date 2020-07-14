@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     python \
     python-pip \
     libbz2-dev \
-    liblzma-dev
+    liblzma-dev \
+    bwa
 
 RUN wget https://github.com/samtools/htslib/releases/download/1.7/htslib-1.7.tar.bz2 && \
     tar jxvf htslib-1.7.tar.bz2 && \
@@ -33,8 +34,4 @@ RUN wget https://github.com/Genomon-Project/fusionfusion/archive/v0.4.1.tar.gz &
 RUN apt-get update && apt-get install -y \
     libkrb5-3 \
     libpng12-0
-
-RUN cd  /usr/local/bin && \
-    wget http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/blat
-RUN chmod a+x /usr/local/bin/blat
 
