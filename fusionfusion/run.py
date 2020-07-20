@@ -59,7 +59,7 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
         fasta2fastq(outputFilePrefix + ".chimeric.clustered.splicing.contig.fa",
                     outputFilePrefix + ".chimeric.clustered.splicing.contig.fastq")
 
-        bwa_options = []
+        bwa_options = args.bwa_option.split() if args.bwa_option else []
         reference_genome = param_conf.reference_genome
 
         with open(outputFilePrefix + ".chimeric.clustered.splicing.contig.sam", 'w') as w, \
