@@ -37,7 +37,7 @@ def create_parser():
     # parser.add_argument("--resource_dir", metavar = "resource_dir", type = str, required=True,
     #                     help = "annotation information directory")
 
-    parser.add_argument("--bwa_option", metavar = "bwa_option", default = None, type = str, help ="options used in bwa")
+    parser.add_argument("--aligner_option", metavar = "aligner_option", default = None, type = str, help ="options used in aligner")
 
     parser.add_argument("--pooled_control_file", default = None, type = str,
                         help = "the path to control data created by merge_control (default: %(default)s)")

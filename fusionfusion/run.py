@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-import sys, os, argparse, subprocess, shutil, re
+import sys, os, argparse, subprocess, shutil
 from . import parseJunctionInfo
 from . import filterJunctionInfo
 from . import annotationFunction
@@ -11,18 +11,6 @@ from . import utils
 
 # import config
 from .config import *
-
-def fasta2fastq(inputFilePath, outputFilePath):
-    with open(inputFilePath) as r, open(outputFilePath, 'w') as w:
-        lines = []
-        for line in r:
-            lines.append(line)
-            if len(lines) == 2:
-                w.write(re.sub('^>', '@', lines[0]))
-                w.write(lines[1])
-                w.write('+\n')
-                w.write('!' * (len(lines[1])-1)); w.write('\n')
-                lines = []
 
 def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
 
@@ -56,24 +44,23 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
     # reference_genome = config.param_conf.get("alignment", "reference_genome")
 
     if os.path.getsize(outputFilePrefix + ".chimeric.clustered.splicing.contig.fa") > 0:
-        fasta2fastq(outputFilePrefix + ".chimeric.clustered.splicing.contig.fa",
-                    outputFilePrefix + ".chimeric.clustered.splicing.contig.fastq")
-
-        bwa_options = args.bwa_option.split() if args.bwa_option else []
+        aligner_options = ['-ax', 'splice', '--MD', '--splice-flank=no']
+        if args.aligner_option:
+            aligner_options.extend(args.aligner_option.split())
         reference_genome = param_conf.reference_genome
 
         with open(outputFilePrefix + ".chimeric.clustered.splicing.contig.sam", 'w') as w, \
              open(os.devnull, 'w') as FNULL:
             fRet = subprocess.check_call(
-                ['bwa', 'mem'] + bwa_options + [
-                    reference_genome,
-                    outputFilePrefix + ".chimeric.clustered.splicing.contig.fastq"
+                ['minimap2'] + aligner_options + [
+                    reference_genome + ".mmi",
+                    outputFilePrefix + ".chimeric.clustered.splicing.contig.fa"
                 ],
                 stdout=w, stderr=FNULL
             )
 
         if fRet != 0:
-            print("bwa error, error code: " + str(fRet), file=sys.stderr)
+            print("aligner error, error code: " + str(fRet), file=sys.stderr)
             sys.exit()
 
         sam2psl.convert(outputFilePrefix + ".chimeric.clustered.splicing.contig.sam",
@@ -100,7 +87,6 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
         subprocess.check_call(["rm", "-f", outputFilePrefix + ".chimeric.clustered.filt3.txt"])
         subprocess.check_call(["rm", "-f", outputFilePrefix + ".chimeric.clustered.splicing.txt"])
         subprocess.check_call(["rm", "-f", outputFilePrefix + ".chimeric.clustered.splicing.contig.fa"])
-        subprocess.check_call(["rm", "-f", outputFilePrefix + ".chimeric.clustered.splicing.contig.fastq"])
         subprocess.check_call(["rm", "-f", outputFilePrefix + ".chimeric.clustered.splicing.contig.sam"])
         subprocess.check_call(["rm", "-f", outputFilePrefix + ".chimeric.clustered.splicing.contig.psl"])
         subprocess.check_call(["rm", "-f", outputFilePrefix + ".chimeric.clustered.splicing.contig.check.txt"])
