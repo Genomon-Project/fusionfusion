@@ -25,11 +25,12 @@ class SAMRecord:
         self.RNEXT = fields[6]
         self.PNEXT = int(fields[7])
         self.TLEN = int(fields[8])
-        self.SEQ = fields[9]
-        self.QUAL = fields[10]
-        self.AS = -len(self.SEQ)
-        self.NM = len(self.SEQ)
+        self.SEQ = fields[9] if fields[9] != '*' else None
+        self.QUAL = fields[10] if fields[10] != '*' else None
+        self.AS = -len(self.SEQ) if self.SEQ else 0
+        self.NM = len(self.SEQ) if self.SEQ else 0
         self.MD = ''
+        self.NN = 0
 
         optionalField = 0;
         for field in fields[11:]:
@@ -42,7 +43,10 @@ class SAMRecord:
             elif field.startswith('MD:'):
                 self.MD = field[field.rfind(':')+1:]
                 optionalField += 1
-            if optionalField == 3:
+            elif field.startswith('nn:'):
+                self.NN = field[field.rfind(':')+1:]
+                optionalField += 1
+            if optionalField == 4:
                 break
 
 class CigarOp:
@@ -68,6 +72,13 @@ class PosCigar:
         self.iclip = -1
         self.ops = []
         self.l_qseq = -1
+
+    def __len__(self):
+        l = 0
+        for e in self.ops:
+            if e.op in set('MIS=X'):
+                l += e.len
+        return l
 
     @staticmethod
     def resolve_cigar_pos(pos, cigar):
@@ -193,14 +204,15 @@ class SAM2PSLConverter:
         sam = SAMRecord(fields)
         m = PosCigar.resolve_cigar_pos(sam.POS - 1, sam.CIGAR)
 
-        if len(sam.SEQ) != m.l_qseq and m.l_qseq > 0:
+        qsize = len(sam.SEQ) if sam.SEQ != None else len(m)
+        if qsize != m.l_qseq and m.l_qseq > 0:
             raise InvalidSAMError('SEQ length not calculated correctly')
 
         psl = PSLRecord()
         psl.misMatches = sam.NM
         psl.strand = "-" if (sam.FLAG & SAMRecord.BAM_FREVERSE) > 0 else "+"
         psl.qName = sam.QNAME
-        psl.qSize = len(sam.SEQ)
+        psl.qSize = qsize
         psl.qStart = m.qStart
         psl.qEnd = m.qEnd + 1
         psl.tName = sam.RNAME
@@ -208,9 +220,15 @@ class SAM2PSLConverter:
         psl.tStart = m.tStart
         psl.tEnd = m.tEnd + 1
 
-        for b in sam.SEQ:
-            if b == 'N' or b == 'n':
-                psl.nCount += 1
+        if sam.NN:
+            psl.nCount = sam.NN
+        elif sam.SEQ != None:
+            for b in sam.SEQ:
+                if b == 'N' or b == 'n':
+                    psl.nCount += 1
+        else:
+            psl.nCount = 0
+
         for e in m.ops:
             if e.op in set('MD=X'):
                 psl.matches += e.len
