@@ -2,11 +2,13 @@
 
 from __future__ import print_function
 
-import sys, os, argparse, subprocess, shutil
+import sys, os, argparse, subprocess, shutil, pysam
+import annot_utils as annot
 from . import parseJunctionInfo
 from . import filterJunctionInfo
 from . import annotationFunction
 from . import utils
+from .short_range_chimera_filter import ShortRangeChimeraFilter
 
 # import config
 from .config import *
@@ -83,12 +85,12 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
 
 def fusionfusion_main(args):
 
-    starBamFile = args.star
+    starFilePrefix = args.star
     ms2BamFile = args.ms2
     th2BamFile = args.th2
     output_dir = args.out
 
-    if starBamFile == None and ms2BamFile  == None and th2BamFile == None:
+    if starFilePrefix == None and ms2BamFile  == None and th2BamFile == None:
         print("At least one of --star, --ms2 or --th2 should be included", file = sys.stderr)
         sys.exit(1)
  
@@ -122,19 +124,53 @@ def fusionfusion_main(args):
 
     ####################
     # parsing chimeric reads from bam files
-    if starBamFile is not None:
+    if starFilePrefix is not None:
 
-        parseJunctionInfo.parseJuncInfo_STAR(starBamFile, output_dir + "/star.chimeric.tmp.txt")
-                                             
+        parseJunctionInfo.parseJuncInfo_STAR(starFilePrefix + ".Chimeric.out.sam",
+                                             output_dir + "/star.chimeric.tmp1.txt")
 
-        hOUT = open(output_dir + "/star.chimeric.txt", "w")
-        subprocess.check_call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/star.chimeric.tmp.txt"], stdout = hOUT)
-        hOUT.close()
+        genome_id = args.genome_id
+        is_grc = args.grc
+        annot.gene.make_gene_info(output_dir + "/star.tmp.refGene.bed.gz", "refseq", genome_id, is_grc, False)
+        annot.gene.make_gene_info(output_dir + "/star.tmp.ensGene.bed.gz", "gencode", genome_id, is_grc, False)
+
+        with pysam.TabixFile(output_dir + "/star.tmp.refGene.bed.gz") as ref_gene_tb, \
+             pysam.TabixFile(output_dir + "/star.tmp.ensGene.bed.gz") as ens_gene_tb:
+            filt = ShortRangeChimeraFilter(ref_gene_tb, ens_gene_tb)
+            filt.run(
+                starFilePrefix + ".SJ.out.tab",
+                starFilePrefix + ".Aligned.sortedByCoord.out.bam",
+                output_dir + "/star.chimeric.tmp2.sam"
+            )
+        subprocess.check_call(["rm", output_dir + "/star.tmp.refGene.bed.gz"])
+        subprocess.check_call(["rm", output_dir + "/star.tmp.ensGene.bed.gz"])
+        subprocess.check_call(["rm", output_dir + "/star.tmp.refGene.bed.gz.tbi"])
+        subprocess.check_call(["rm", output_dir + "/star.tmp.ensGene.bed.gz.tbi"])
+
+        pysam.sort(
+            "-n",
+            "-o", output_dir + "/star.chimeric.tmp2.sorted.sam",
+            output_dir + "/star.chimeric.tmp2.sam"
+        )
+        parseJunctionInfo.parseJuncInfo_STAR(output_dir + "/star.chimeric.tmp2.sorted.sam",
+                                             output_dir + "/star.chimeric.tmp2.txt")
+
+        with open(output_dir + "/star.chimeric.txt", "w") as hOUT:
+            subprocess.check_call([
+                "bash", "-c",
+                "cat {input1} {input2} | sort -k1,1 -k2,2n -k4,4 -k5,5n".format(
+                    input1=output_dir + "/star.chimeric.tmp1.txt",
+                    input2=output_dir + "/star.chimeric.tmp2.txt"
+                )
+            ], stdout=hOUT)
 
         cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star", args)
 
         if debug_mode == False:
-            subprocess.check_call(["rm", output_dir + "/star.chimeric.tmp.txt"])
+            subprocess.check_call(["rm", output_dir + "/star.chimeric.tmp1.txt"])
+            subprocess.check_call(["rm", output_dir + "/star.chimeric.tmp2.txt"])
+            subprocess.check_call(["rm", output_dir + "/star.chimeric.tmp2.sam"])
+            subprocess.check_call(["rm", output_dir + "/star.chimeric.tmp2.sorted.sam"])
             subprocess.check_call(["rm", output_dir + "/star.chimeric.txt"])
 
     if ms2BamFile is not None:
