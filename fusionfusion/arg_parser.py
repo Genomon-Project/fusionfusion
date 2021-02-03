@@ -13,8 +13,8 @@ def create_parser():
     parser.add_argument("--version", action = "version", version = "%(prog)s " + __version__)
     # parser.add_argument("--version", action = "version", version = "fusionfusion-0.5.0b1")
 
-    parser.add_argument("--star", metavar = "star.Chimeric.out.sam", default = None, type = str,
-                        help = "the path to the chimeric sam file by STAR")
+    parser.add_argument("--star", metavar = "star", default = None, type = str,
+                        help = "the path prefix of STAR result files")
 
     parser.add_argument("--ms2", metavar = "ms2.bam", default = None, type = str,
                         help = "the path to the bam file by Map splice2")
