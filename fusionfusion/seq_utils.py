@@ -7,9 +7,9 @@ def getSeq(reference, region_tuple):
 
     seq = ""    
     for reg in region_tuple_sorted:
-        for item in pysam.faidx(reference, reg[0] + ":" + str(reg[1]) + "-" + str(reg[2])):
-            if item[0] == ">": continue
-            seq = seq + item.rstrip('\n')
+        for line in pysam.faidx(reference, reg[0] + ":" + str(reg[1]) + "-" + str(reg[2]), split_lines=True):
+            if line[0] == ">": continue
+            seq += line
 
     return(seq)
 
