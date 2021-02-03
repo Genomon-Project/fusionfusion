@@ -40,6 +40,9 @@ def create_parser():
     parser.add_argument("--pooled_control_file", default = None, type = str,
                         help = "the path to control data created by merge_control (default: %(default)s)")
 
+    parser.add_argument("--no_blat", default=False, action='store_true',
+                        help="if true, skip filters using BLAT")
+
     parser.add_argument("--debug", default = False, action = 'store_true', help = "keep intermediate files")
 
 
