@@ -131,13 +131,15 @@ def filterPoolControl(input_file, output_file, control_file):
     hout.close()
 
 
-def extractSplicingPattern(inputFilePath, outputFilePath):
+def extractSplicingPattern(inputFilePath, outputFilePath, traceFilePath):
 
     # reference_genome = config.param_conf.get("alignment", "reference_genome")
     reference_genome = param_conf.reference_genome
 
     hIN = open(inputFilePath, 'r')
     hOUT = open(outputFilePath, 'w')
+    if traceFilePath:
+        hTRACE = open(traceFilePath, 'w')
 
     for line in hIN:
         F = line.rstrip('\n').split('\t')
@@ -477,11 +479,24 @@ def extractSplicingPattern(inputFilePath, outputFilePath):
         if F[2] == "+": contigSeq1 = seq_utils.reverseComplement(contigSeq1)
         if F[5] == "+": contigSeq2 = seq_utils.reverseComplement(contigSeq2)
 
-        print('\t'.join(['\t'.join(F[0:6]), str(inSeq), str(len(F[8].split(';'))), str(contig1), str(contig2), contigSeq1, contigSeq2]), file = hOUT)
-
+        common_cols = F[0:6] + [str(inSeq)]
+        out_cols = common_cols + [
+            str(len(F[8].split(';'))), str(contig1), str(contig2),
+            contigSeq1, contigSeq2
+        ]
+        print('\t'.join(out_cols), file=hOUT)
+        if traceFilePath:
+            sources = set()
+            for qname in F[7].split(';'):
+                m = re.search('@([^@]+)$', qname)
+                if m: sources.add(m.group(1))
+            trace_cols = common_cols + [','.join(sorted(sources, reverse=True)) if sources else '---']
+            print('\t'.join(trace_cols), file=hTRACE)
 
     hIN.close()
     hOUT.close()
+    if traceFilePath:
+        hTRACE.close()
 
 
 
@@ -625,4 +640,3 @@ def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile):
 
     hIN.close()
     hOUT.close()
-

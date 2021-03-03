@@ -343,7 +343,7 @@ def parseJuncInfo_th2(inputFilePath, outputFilePath):
     hOUT.close()
 
 
-def getFusInfo_STAR(juncLine):
+def getFusInfo_STAR(juncLine, source=None):
 
     # abnormal_insert_size = config.param_conf.getint("parse_condition", "abnormal_insert_size")
     # min_major_clip_size = config.param_conf.getint("parse_condition", "min_major_clip_size")
@@ -409,7 +409,11 @@ def getFusInfo_STAR(juncLine):
             coverRegion_primary = cigar_utils.getCoverRegion(F[2], F[3], F[5])
             readLength_primary = len(F[9])
             endPos_primary = cigar_utils.getEndPos(pos_primary, F[5])
-            readID_primary = F[0] + ("/1" if flags[6] == "1" else "/2")
+            readID_primary = "{qname}/{read}{suffix}".format(
+                qname=F[0],
+                read=(1 if flags[6] == "1" else 2),
+                suffix=("@" + source if source else "")
+            )
 
             tempMatch = cigarSRe_right.search(F[5])
             if tempMatch is not None: right_clipping_primary = int(tempMatch.group(1))
@@ -574,7 +578,7 @@ def getFusInfo_STAR(juncLine):
 
 
 
-def parseJuncInfo_STAR(inputFilePath, outputFilePath):
+def parseJuncInfo_STAR(inputFilePath, outputFilePath, source=None):
 
      
     hIN = open(inputFilePath, 'r')
@@ -589,7 +593,7 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath):
 
         if tempID != F[0]:
             if tempID != "" and len(tempLine) == 3:
-                tempFusInfo = getFusInfo_STAR(tempLine)
+                tempFusInfo = getFusInfo_STAR(tempLine, source)
                 if tempFusInfo is not None:
                     print(tempFusInfo, file = hOUT)
 
@@ -602,7 +606,7 @@ def parseJuncInfo_STAR(inputFilePath, outputFilePath):
 
 
     if tempID != "" and len(tempLine) == 3:
-        tempFusInfo = getFusInfo_STAR(tempLine)
+        tempFusInfo = getFusInfo_STAR(tempLine, source)
         if tempFusInfo is not None:
             print(tempFusInfo, file = hOUT)
 

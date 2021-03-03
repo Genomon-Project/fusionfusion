@@ -13,7 +13,7 @@ from .short_range_chimera_filter import ShortRangeChimeraFilter
 # import config
 from .config import *
 
-def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
+def cluster_filter_junction(inputFilePath, outputFilePrefix, args, generates_trace=False):
 
     # debug_mode = config.param_conf.getboolean("debug", "debug_mode")
     debug_mode = param_conf.debug
@@ -32,8 +32,10 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
         shutil.copyfile(outputFilePrefix + ".chimeric.clustered.filt1.txt",
                          outputFilePrefix + ".chimeric.clustered.filt2.txt")
 
+    traceFilePath = outputFilePrefix + ".chimeric.trace.txt" if generates_trace else None
     filterJunctionInfo.extractSplicingPattern(outputFilePrefix + ".chimeric.clustered.filt2.txt", 
-                                              outputFilePrefix + ".chimeric.clustered.splicing.txt")
+                                              outputFilePrefix + ".chimeric.clustered.splicing.txt",
+                                              traceFilePath)
 
     if args.no_blat:
         annotationFunction.filterAndAnnotation(
@@ -136,7 +138,7 @@ def fusionfusion_main(args):
     ####################
     # parsing chimeric reads from bam files
     if starBamFile is not None:
-
+        generates_trace = False
         starSjTab = args.star_sj_tab
         starAlignedBam = args.star_aligned_bam
         if starSjTab is None or starAlignedBam is None:
@@ -152,7 +154,9 @@ def fusionfusion_main(args):
                     output_dir + "/star.chimeric.tmp.txt"
                 ], stdout=hOUT)
         else:
-            parseJunctionInfo.parseJuncInfo_STAR(starBamFile, output_dir + "/star.chimeric.tmp1.txt")
+            parseJunctionInfo.parseJuncInfo_STAR(starBamFile,
+                                                 output_dir + "/star.chimeric.tmp1.txt",
+                                                 source="Chimeric")
 
             genome_id = args.genome_id
             is_grc = args.grc
@@ -174,7 +178,8 @@ def fusionfusion_main(args):
                 output_dir + "/star.chimeric.tmp2.sam"
             )
             parseJunctionInfo.parseJuncInfo_STAR(output_dir + "/star.chimeric.tmp2.sorted.sam",
-                                                 output_dir + "/star.chimeric.tmp2.txt")
+                                                 output_dir + "/star.chimeric.tmp2.txt",
+                                                 source="SJ")
 
             with open(output_dir + "/star.chimeric.txt", "w") as hOUT:
                 subprocess.check_call([
@@ -185,7 +190,10 @@ def fusionfusion_main(args):
                     )
                 ], stdout=hOUT)
 
-        cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star", args)
+            generates_trace = True
+
+        cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star",
+                                args, generates_trace=generates_trace)
 
         if not debug_mode:
             for fname in ["star.chimeric.tmp.txt", "star.chimeric.tmp1.txt",
@@ -243,4 +251,12 @@ def fusionfusion_main(args):
     annotationFunction.merge_fusion_result(output_dir, 
                                            output_dir + "/fusion_fusion.result.txt")
 
-    
+    if not debug_mode:
+        for fname in [
+            "star.chimeric.trace.txt",
+            # "ms2.chimeric.trace.txt",
+            # "th2.chimeric.trace.txt"
+            ]:
+            path = output_dir + '/' + fname
+            if os.path.exists(path):
+                os.remove(path)
