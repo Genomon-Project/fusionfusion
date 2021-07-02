@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 from __future__ import print_function
-import sys, pysam, os, subprocess
+import sys, pysam, os, subprocess, re
 import annot_utils.gene
 import annot_utils.exon
 
@@ -271,4 +271,29 @@ def merge_fusion_result(input_dir, output_file_path):
     hOUT.close()
 
     subprocess.check_call(["rm", "-rf", output_file_path + ".unsorted.tmp"])
+
+    trace_files = list(filter(os.path.exists, [
+        input_dir + "/star.chimeric.trace.txt",
+        # input_dir + "/ms2.chimeric.trace.txt",
+        # input_dir + "/th2.chimeric.trace.txt"
+    ]))
+    if trace_files:
+        traced_file_path = re.sub(r'(?:\.txt)?$', '.traced.txt', output_file_path, count=1)
+        emit_traced(output_file_path, trace_files, traced_file_path)
  
+ 
+def emit_traced(input_file, trace_files, output_file):
+    trace = {}
+    for trace_file in trace_files:
+        with open(trace_file) as t:
+            for line in t:
+                cols = line.rstrip().split('\t')
+                if cols[7] != '---':
+                    trace[tuple(cols[0:7])] = cols[7]
+
+    with open(input_file) as r, open(output_file, 'w') as w:
+        for line in r:
+            cols = line.rstrip().split('\t')
+            source = trace.get(tuple(cols[0:7]), '---')
+            cols.append(source)
+            print('\t'.join(cols), file=w)

@@ -44,6 +44,14 @@ For STAR, our software uses the chimeric sam file
 {output_prefix}.Chimeric.out.sam
 ```
 
+Optionally, you can specify the following files to enable further analysis (Note that
+the aligned bam must be sorted by coordinate):
+
+```
+{output_prefix}.SJ.out.tab
+{output_prefix}.Aligned.sortedByCoord.out.bam
+```
+
 For MapSplice2, our software uses the read alignment file
 ```
 alignments.sam (bam)
@@ -73,6 +81,8 @@ fusionfusion [-h] [--version] [--star star.Chimeric.out.sam]
                   [--min_allowed_contig_match_diff MIN_ALLOWED_CONTIG_MATCH_DIFF]
                   [--check_contig_size_other_breakpoint CHECK_CONTIG_SIZE_OTHER_BREAKPOINT]
                   [--filter_same_gene]
+                  [--star_sj_tab star.SJ.out.tab]
+                  [--star_aligned_bam star.Aligned.sortedByCoord.out.bam]
 ```
 At least one of --star, --ms2, --th2 arguments should be specified.
 The arguments of --out and --reference_genome are mandatory. 

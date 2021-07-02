@@ -2,16 +2,18 @@
 
 from __future__ import print_function
 
-import sys, os, argparse, subprocess, shutil
+import sys, os, argparse, subprocess, shutil, pysam
+import annot_utils as annot
 from . import parseJunctionInfo
 from . import filterJunctionInfo
 from . import annotationFunction
 from . import utils
+from .short_range_chimera_filter import ShortRangeChimeraFilter
 
 # import config
 from .config import *
 
-def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
+def cluster_filter_junction(inputFilePath, outputFilePrefix, args, generates_trace=False):
 
     # debug_mode = config.param_conf.getboolean("debug", "debug_mode")
     debug_mode = param_conf.debug
@@ -30,8 +32,10 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args):
         shutil.copyfile(outputFilePrefix + ".chimeric.clustered.filt1.txt",
                          outputFilePrefix + ".chimeric.clustered.filt2.txt")
 
+    traceFilePath = outputFilePrefix + ".chimeric.trace.txt" if generates_trace else None
     filterJunctionInfo.extractSplicingPattern(outputFilePrefix + ".chimeric.clustered.filt2.txt", 
-                                              outputFilePrefix + ".chimeric.clustered.splicing.txt")
+                                              outputFilePrefix + ".chimeric.clustered.splicing.txt",
+                                              traceFilePath)
 
     if args.no_blat:
         annotationFunction.filterAndAnnotation(
@@ -134,19 +138,70 @@ def fusionfusion_main(args):
     ####################
     # parsing chimeric reads from bam files
     if starBamFile is not None:
+        generates_trace = False
+        starSjTab = args.star_sj_tab
+        starAlignedBam = args.star_aligned_bam
+        if starSjTab is None or starAlignedBam is None:
+            if starSjTab is not None or starAlignedBam is not None:
+                msg = "To enable further analysis using STAR's SJ.out.tab, both --star_sj_tab and --star_aligned_bam options must be specified."
+                print(msg, file=sys.stderr)
 
-        parseJunctionInfo.parseJuncInfo_STAR(starBamFile, output_dir + "/star.chimeric.tmp.txt")
-                                             
+            parseJunctionInfo.parseJuncInfo_STAR(starBamFile, output_dir + "/star.chimeric.tmp.txt")
 
-        hOUT = open(output_dir + "/star.chimeric.txt", "w")
-        subprocess.check_call(["sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n", output_dir + "/star.chimeric.tmp.txt"], stdout = hOUT)
-        hOUT.close()
+            with open(output_dir + "/star.chimeric.txt", "w") as hOUT:
+                subprocess.check_call([
+                    "sort", "-k1,1", "-k2,2n", "-k4,4", "-k5,5n",
+                    output_dir + "/star.chimeric.tmp.txt"
+                ], stdout=hOUT)
+        else:
+            parseJunctionInfo.parseJuncInfo_STAR(starBamFile,
+                                                 output_dir + "/star.chimeric.tmp1.txt",
+                                                 source="Chimeric")
 
-        cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star", args)
+            genome_id = args.genome_id
+            is_grc = args.grc
+            annot.gene.make_gene_info(output_dir + "/star.tmp.refGene.bed.gz", "refseq", genome_id, is_grc, False)
+            annot.gene.make_gene_info(output_dir + "/star.tmp.ensGene.bed.gz", "gencode", genome_id, is_grc, False)
 
-        if debug_mode == False:
-            subprocess.check_call(["rm", output_dir + "/star.chimeric.tmp.txt"])
-            subprocess.check_call(["rm", output_dir + "/star.chimeric.txt"])
+            with pysam.TabixFile(output_dir + "/star.tmp.refGene.bed.gz") as ref_gene_tb, \
+                pysam.TabixFile(output_dir + "/star.tmp.ensGene.bed.gz") as ens_gene_tb:
+                filt = ShortRangeChimeraFilter(ref_gene_tb, ens_gene_tb)
+                filt.run(starSjTab, starAlignedBam, output_dir + "/star.chimeric.tmp2.sam")
+            os.remove(output_dir + "/star.tmp.refGene.bed.gz")
+            os.remove(output_dir + "/star.tmp.ensGene.bed.gz")
+            os.remove(output_dir + "/star.tmp.refGene.bed.gz.tbi")
+            os.remove(output_dir + "/star.tmp.ensGene.bed.gz.tbi")
+
+            pysam.sort(
+                "-n",
+                "-o", output_dir + "/star.chimeric.tmp2.sorted.sam",
+                output_dir + "/star.chimeric.tmp2.sam"
+            )
+            parseJunctionInfo.parseJuncInfo_STAR(output_dir + "/star.chimeric.tmp2.sorted.sam",
+                                                 output_dir + "/star.chimeric.tmp2.txt",
+                                                 source="SJ")
+
+            with open(output_dir + "/star.chimeric.txt", "w") as hOUT:
+                subprocess.check_call([
+                    "sh", "-c",
+                    "cat {input1} {input2} | sort -k1,1 -k2,2n -k4,4 -k5,5n".format(
+                        input1=output_dir + "/star.chimeric.tmp1.txt",
+                        input2=output_dir + "/star.chimeric.tmp2.txt"
+                    )
+                ], stdout=hOUT)
+
+            generates_trace = True
+
+        cluster_filter_junction(output_dir + "/star.chimeric.txt", output_dir + "/star",
+                                args, generates_trace=generates_trace)
+
+        if not debug_mode:
+            for fname in ["star.chimeric.tmp.txt", "star.chimeric.tmp1.txt",
+                          "star.chimeric.tmp2.txt", "star.chimeric.tmp2.sam",
+                          "star.chimeric.tmp2.sorted.sam", "star.chimeric.txt"]:
+                path = output_dir + '/' + fname
+                if os.path.exists(path):
+                    os.remove(path)
 
     if ms2BamFile is not None:
 
@@ -196,4 +251,12 @@ def fusionfusion_main(args):
     annotationFunction.merge_fusion_result(output_dir, 
                                            output_dir + "/fusion_fusion.result.txt")
 
-    
+    if not debug_mode:
+        for fname in [
+            "star.chimeric.trace.txt",
+            # "ms2.chimeric.trace.txt",
+            # "th2.chimeric.trace.txt"
+            ]:
+            path = output_dir + '/' + fname
+            if os.path.exists(path):
+                os.remove(path)
