@@ -491,7 +491,7 @@ def getFusInfo_STAR(juncLine, source=None):
             if clipLen_SA > expected_clipLen_SA:
                 surPlus_start = readLength_primary - clipLen_primary
                 surPlus_end = surPlus_start + clipLen_SA - expected_clipLen_SA
-                juncSurplus = read.seq[surPlus_start:surPlus_end]
+                juncSurplus = F[9][surPlus_start:surPlus_end]
 
             # reorder by the chromosome position and print
             if juncChr_primary < juncChr_SA or juncChr_primary == juncChr_SA and juncPos_primary <= juncPos_SA:
@@ -563,7 +563,7 @@ def getFusInfo_STAR(juncLine, source=None):
             if clipLen_SA > expected_clipLen_SA:
                 surPlus_end = clipLen_primary # this is right
                 surPlus_start = surPlus_end - (clipLen_SA - expected_clipLen_SA)
-                juncSurplus = read.seq[surPlus_start:surPlus_end]
+                juncSurplus = F[9][surPlus_start:surPlus_end]
 
             # reorder by the chromosome position and print
             if juncChr_primary < juncChr_SA or juncChr_primary == juncChr_SA and juncPos_primary <= juncPos_SA:
