@@ -13,7 +13,7 @@ def create_parser():
     parser.add_argument("--version", action = "version", version = "%(prog)s " + __version__)
     # parser.add_argument("--version", action = "version", version = "fusionfusion-0.5.0b1")
 
-    parser.add_argument("--star", metavar = "star.Chimeric.out.sam", default = None, type = str,
+    parser.add_argument("--star", metavar = "star.Chimeric.out.sam", default = None, type = str, required=True,
                         help = "the path to the chimeric sam file by STAR")
 
     parser.add_argument("--star_sj_tab", metavar="star.SJ.out.tab", default=None, type=str,
@@ -21,12 +21,6 @@ def create_parser():
 
     parser.add_argument("--star_aligned_bam", metavar="star.Aligned.sortedByCoord.out.bam", default=None, type=str,
                         help="the path to the aligned bam file by STAR (which must be sorted by coordinate)")
-
-    parser.add_argument("--ms2", metavar = "ms2.bam", default = None, type = str,
-                        help = "the path to the bam file by Map splice2")
-
-    parser.add_argument("--th2", metavar = "th2.bam", default = None, type = str,
-                        help = "the path to the bam file by TopHat2")
 
     parser.add_argument("--out", metavar = "output_dir", default = None, type = str, required=True,
                         help = "the path to the output directory")
