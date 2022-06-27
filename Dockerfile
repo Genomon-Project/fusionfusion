@@ -25,9 +25,6 @@ RUN wget https://github.com/samtools/htslib/releases/download/1.15/htslib-1.15.t
     make && \
     make install
 
-#RUN pip install --upgrade pip
-#RUN pip2 install --upgrade setuptools
-
 RUN pip2 install pysam==0.19.1
 RUN pip2 install annot-utils==0.3.1
 RUN pip2 install chimera_utils==0.6.0
@@ -41,8 +38,7 @@ RUN wget -q https://github.com/friend1ws/fusion_utils/archive/v0.2.0.tar.gz && \
     cd fusion_utils-0.2.0 && \
     python2 setup.py install
     
-RUN wget -q https://github.com/aokad/fusionfusion/archive/refs/tags/v0.5.2b1.tar.gz && \
-    tar xzvf v0.5.2b1.tar.gz && \
-    cd fusionfusion-0.5.2b1 && \
-    python2 setup.py install && \
-    echo "success!"
+RUN wget -q https://github.com/Genomon-Project/fusionfusion/archive/refs/tags/v0.5.2.tar.gz && \
+    tar -zxvf v0.5.2.tar.gz && \
+    cd fusionfusion-0.5.2 && \
+    python2 setup.py build install
