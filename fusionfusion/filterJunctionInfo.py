@@ -628,13 +628,18 @@ def filterContigCheck(inputFilePath, outputFilePath, checkMatchFile):
         match1 = (key2match1[key] if key in key2match1 else "---\t---\t---\t---\t---")
         match2 = (key2match2[key] if key in key2match2 else "---\t---\t---\t---\t---") 
 
-        matches1 = match1.split('\t')
-        matches2 = match2.split('\t')
+        (contig1_targetAln, contig1_otherMatch_str, contig1_crossMatch, _, _) = match1.split('\t')
+        (contig2_targetAln, contig2_otherMatch_str, contig2_crossMatch, _, _) = match2.split('\t')
 
-        if matches1[0] == "---" or matches2[0] == "---": continue
-        if matches1[1] != "---" or matches2[1] != "---": continue
-        if float(matches1[2]) > 0 or float(matches2[2]) > 0: continue
-        # if int(matches1[3]) < min_cover_size or int(matches2[3]) < min_cover_size: continue
+        if contig1_targetAln == "---" or contig2_targetAln == "---": continue
+        otherMatches = []
+        for otherMatch in [contig1_otherMatch_str, contig2_otherMatch_str]:
+            for m in otherMatch.split(";"):
+                if m == "---": continue
+                if m.split(":")[0].endswith("_alt"): continue
+                otherMatches.append(m)
+        if len(otherMatches) > 0: continue
+        if float(contig1_crossMatch) > 0 or float(contig2_crossMatch) > 0: continue
 
         print(key + '\t' + F[6] + '\t' + F[7] + '\t' +  match1 + '\t' + match2, file = hOUT)
 

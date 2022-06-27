@@ -99,11 +99,12 @@ def cluster_filter_junction(inputFilePath, outputFilePrefix, args, generates_tra
 def fusionfusion_main(args):
 
     starBamFile = args.star
-    ms2BamFile = args.ms2
-    th2BamFile = args.th2
+    ms2BamFile = None
+    th2BamFile = None
     output_dir = args.out
 
     if starBamFile == None and ms2BamFile  == None and th2BamFile == None:
+        #print("At least one of --star, --ms2 or --th2 should be included", file = sys.stderr)
         print("At least one of --star, --ms2 or --th2 should be included", file = sys.stderr)
         sys.exit(1)
  
