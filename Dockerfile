@@ -15,30 +15,24 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libkrb5-3 \
     libpng16-16 \
-    python2 \
-    python2-dev \
-    python-pip
+    python3 \
+    python3-dev \
+    python3-pip
     
-RUN wget https://github.com/samtools/htslib/releases/download/1.15/htslib-1.15.tar.bz2 && \
+RUN wget -q https://github.com/samtools/htslib/releases/download/1.15/htslib-1.15.tar.bz2 && \
     tar jxvf htslib-1.15.tar.bz2 && \
     cd htslib-1.15 && \
     make && \
     make install
 
-RUN pip2 install pysam==0.19.1
-RUN pip2 install annot-utils==0.3.1
-RUN pip2 install chimera_utils==0.6.0
+RUN pip3 install pysam==0.19.1
+RUN pip3 install annot-utils==0.3.1
+RUN pip3 install chimera_utils==0.6.0
 
 RUN cd  /usr/local/bin && \
     wget http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/blat && \
     chmod a+x /usr/local/bin/blat
 
-RUN wget -q https://github.com/friend1ws/fusion_utils/archive/v0.2.0.tar.gz && \
-    tar xzvf v0.2.0.tar.gz && \
-    cd fusion_utils-0.2.0 && \
-    python2 setup.py install
-    
-RUN wget -q https://github.com/Genomon-Project/fusionfusion/archive/refs/tags/v0.5.2.tar.gz && \
-    tar -zxvf v0.5.2.tar.gz && \
-    cd fusionfusion-0.5.2 && \
-    python2 setup.py build install
+RUN git clone https://github.com/Genomon-Project/fusionfusion.git && \
+    cd fusionfusion && \
+    python3 setup.py build install
