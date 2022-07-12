@@ -27,7 +27,6 @@ RUN wget -q https://github.com/samtools/htslib/releases/download/1.15/htslib-1.1
 
 RUN pip3 install pysam==0.19.1
 RUN pip3 install annot-utils==0.3.1
-RUN pip3 install chimera_utils==0.6.0
 
 RUN cd  /usr/local/bin && \
     wget http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/blat && \
@@ -36,3 +35,5 @@ RUN cd  /usr/local/bin && \
 RUN git clone https://github.com/Genomon-Project/fusionfusion.git && \
     cd fusionfusion && \
     python3 setup.py build install
+
+RUN pip3 install chimera_utils==0.6.0
