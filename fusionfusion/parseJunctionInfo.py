@@ -391,6 +391,7 @@ def getFusInfo_STAR(juncLine, source=None):
     # collect information about primary junction read and its pair read
     right_clipping_primary = 0
     left_clipping_primary = 0
+    seq_primary = ""
     cigar_primary = ""
     readLength_primary = 0
     readID_primary = ""
@@ -407,6 +408,7 @@ def getFusInfo_STAR(juncLine, source=None):
             dir_primary = ("-" if flags[4] == "1" else "+")
             mq_primary = F[4]
             coverRegion_primary = cigar_utils.getCoverRegion(F[2], F[3], F[5])
+            seq_primary = F[9]
             readLength_primary = len(F[9])
             endPos_primary = cigar_utils.getEndPos(pos_primary, F[5])
             readID_primary = "{qname}/{read}{suffix}".format(
@@ -491,7 +493,7 @@ def getFusInfo_STAR(juncLine, source=None):
             if clipLen_SA > expected_clipLen_SA:
                 surPlus_start = readLength_primary - clipLen_primary
                 surPlus_end = surPlus_start + clipLen_SA - expected_clipLen_SA
-                juncSurplus = read.seq[surPlus_start:surPlus_end]
+                juncSurplus = seq_primary[surPlus_start:surPlus_end]
 
             # reorder by the chromosome position and print
             if juncChr_primary < juncChr_SA or juncChr_primary == juncChr_SA and juncPos_primary <= juncPos_SA:
@@ -563,7 +565,7 @@ def getFusInfo_STAR(juncLine, source=None):
             if clipLen_SA > expected_clipLen_SA:
                 surPlus_end = clipLen_primary # this is right
                 surPlus_start = surPlus_end - (clipLen_SA - expected_clipLen_SA)
-                juncSurplus = read.seq[surPlus_start:surPlus_end]
+                juncSurplus = seq_primary[surPlus_start:surPlus_end]
 
             # reorder by the chromosome position and print
             if juncChr_primary < juncChr_SA or juncChr_primary == juncChr_SA and juncPos_primary <= juncPos_SA:
